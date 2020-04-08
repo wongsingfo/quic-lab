@@ -12,4 +12,12 @@ inline std::unique_ptr<T> make_unique(Args &&... args) {
 
 }
 
+inline void dynamic_check(bool flag) {
+    if (flag == false) {
+        throw std::runtime_error("dynamic_check failed");
+    } else {
+        // ok
+    }
+}
+
 #endif

@@ -1,13 +1,13 @@
 #ifndef QUIC_BINARY_H
 #define QUIC_BINARY_H
 
-#include <stddef.h>
-#include <string.h>
+#include <cstddef>
+#include <cstring>
 #include <string>
 
 class String {
 
-public: 
+public:
     using dtype = unsigned char;
 
     String(const dtype* data, size_t size)
@@ -18,9 +18,9 @@ public:
     String(const char* data, size_t size)
         : String((dtype*)data, size) {}
 
-    String(size_t size) 
+    explicit String(size_t size)
         : size_(size),
-          data_(new dtype[size]) 
+          data_(new dtype[size])
         {}
 
     ~String() {
@@ -32,12 +32,16 @@ public:
         size_ = 0;
     }
 
-    std::string to_string() const;
+    inline String copy() {
+        return String(data_, size_);
+    }
+
+    std::string to_hex() const;
 
     inline dtype* data() const { return data_; }
     inline size_t size() const { return size_; }
 
-    String(String &&other) {
+    String(String &&other) noexcept {
         data_ = other.data();
         size_ = other.size();
         other.reset();
@@ -47,10 +51,16 @@ public:
     // text must end with \0.
     //
     // For example, 0x12ff, 12ff
+    static String from_hex(const char* text);
+
     static String from_text(const char* text);
 
+    inline static String empty_string() {
+        return String(0);
+    }
+
     // disallow copy and assignment
-    String (const String&) = delete; \
+    String (const String&) = delete;
     String& operator=(const String&) = delete;
 
 private:

@@ -4,7 +4,9 @@
 #include <ios>
 #include <iomanip>
 
-String String::from_text(const char* text) {
+#include "util/utility.h"
+
+String String::from_hex(const char* text) {
     std::string result;
 
     const char* pt = text;
@@ -18,7 +20,10 @@ String String::from_text(const char* text) {
 
         char c1 = *pt;
         pt += 1;
+
+        bool space_hole = false;
         while (*pt && isspace(*pt)) {
+            space_hole = true;
             pt += 1;
         }
 
@@ -29,14 +34,20 @@ String String::from_text(const char* text) {
         char c2 = *pt;
         pt += 1;
 
-        int byte = std::stoi(std::string(1, c1) + c2, 0, 16);
+        if (c1 == '0' && c2 == 'x' && !space_hole) {
+            // skip
+        } else {
+            int byte = std::stoi(std::string(1, c1) + c2, 0, 16);
 
-        result += (char) (byte);
+            dynamic_check(0 <= byte && byte <= 255);
+
+            result += (char) (byte);
+        }
     }
 
 }
 
-std::string String::to_string() const {
+std::string String::to_hex() const {
     std::stringstream stream;
     stream << std::hex;
 
@@ -46,5 +57,9 @@ std::string String::to_string() const {
     }
 
     return stream.str();
+}
+
+String String::from_text(const char *text) {
+    return String(text, strlen(text));
 }
 

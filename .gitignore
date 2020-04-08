@@ -2,3 +2,10 @@
 ## The output directory
 out/
 
+## CLion
+/.idea
+/cmake-build-debug
+
+## sftp
+/sftp-config.json
+

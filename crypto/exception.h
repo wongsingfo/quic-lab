@@ -32,7 +32,7 @@ public:
 
 };
 
-int openssl_call(const std::string &s_attempt, int return_value) {
+inline int openssl_call(const std::string &s_attempt, int return_value) {
     if (return_value > 0) {
         return return_value;
     }

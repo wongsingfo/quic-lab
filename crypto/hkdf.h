@@ -1,7 +1,7 @@
 // adapted from https://github.com/massar/rfc6234
 
 #ifndef HKDF_H
-#define HKDF_H 
+#define HKDF_H
 
 #include "util/utility.h"
 #include "util/exception.h"
@@ -29,6 +29,13 @@ namespace crypto {
  *     HashLen: the length of the hash function output in octets
  */
 
+
+String hkdf_extract(const String &salt,
+                    const String &ikm);
+
+String hkdf_expand(const String &prk, const String &info, size_t length);
+
+// a wrapper function hkdf_extract() and hkdf_expand()
 String hkdf(const String &salt,
             const String &secret,
             const String &info,
@@ -53,6 +60,12 @@ String hkdf(const String &salt,
  * In QUIC, the `context` is always empty.
  */
 
+String hkdf_expand_label(const String &prk,
+                         const String &label,
+                         const String &context,
+                         size_t length);
+
+// a wrapper function for hkdf_extract() and hkdf_expand_label()
 String hkdf_label(const String &salt,
                   const String &secret,
                   const String &label,

@@ -51,6 +51,13 @@ public:
         other.reset();
     }
 
+    String& operator = (String &&other) noexcept {
+        data_ = other.data();
+        size_ = other.size();
+        other.reset();
+        return *this;
+    }
+
     // Construct a String from a human-readable representation. The
     // text must end with \0.
     //
@@ -66,6 +73,8 @@ public:
     // disallow copy and assignment
     String (const String&) = delete;
     String& operator=(const String&) = delete;
+
+    friend std::ostream& operator<<(std::ostream& os, const String& self);
 
 private:
 

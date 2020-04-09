@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "util/optional.h"
-#include "transport/cid.h"
+#include "transport/types.h"
 
 // TODO
 
@@ -30,22 +30,36 @@ using PacketNumber = uint64_t;
 
 using std::experimental::optional;
 
-class PacketHeader {
+struct PacketHeader {
 
-private:
-    PacketType type_;
-    Version version_;
-    Cid scid_;
-    Cid dcid_;
-    PacketNumber number;
+    PacketType type;
+    Version version;
+    Cid scid;
+    Cid dcid;
 
-    optional< String > Token;
+    // the length includes both the Packet Number and Payload fields
+    size_t length;
+
+    // only present in VersionNegotiation
     optional< std::vector<Version> > versions_;
 
-public:
+    // [encrypted] only in long packet header
+    size_t pkt_num_len;
+
+    // [encrypted]
+    PacketNumber pkt_number;
+
+    // only present in Initial and Retry
+    optional< String > token;
+
     PacketHeader(Cid &&scid, Cid &&dcid)
-        : scid_(std::move(scid)),
-          dcid_(std::move(dcid)) {}
+        : scid(std::move(scid)),
+          dcid(std::move(dcid)) {}
+
+    /* The header protection algorithm uses both the header protection key
+     * and a sample of the ciphertext from the packet Payload field. */
+
+    void decrypt(String hp);
 
     static PacketHeader from_reader(StringReader &reader);
 

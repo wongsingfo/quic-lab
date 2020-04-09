@@ -32,6 +32,10 @@ public:
         read(dest.data(), length);
     }
 
+    inline void read(String &dest) {
+        read(dest.data(), dest.size());
+    }
+
     uint8_t peek_u8();
     uint8_t read_u8();
 

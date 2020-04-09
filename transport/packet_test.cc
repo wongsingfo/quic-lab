@@ -65,5 +65,8 @@ TEST_F(PacketTest, DecodeHeader) {
     StringReader reader(initial_packet);
     PacketHeader header =
         PacketHeader::from_reader(reader);
+
+    EXPECT_EQ(header.token.value().size(), 0);
+    EXPECT_EQ(header.length, 1182);
 }
 

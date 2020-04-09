@@ -63,3 +63,24 @@ String String::from_text(const char *text) {
     return String(text, strlen(text));
 }
 
+std::ostream &operator<<(std::ostream &os, const String &self) {
+    int size = self.size();
+    os << "[";
+//    os <<  self.size() << " ";
+
+    String::dtype *first = self.data();
+    String::dtype *last = first + size;
+
+    for (int i = 0; first != last; first++, i++) {
+        int byte = (int) *first;
+        os << std::setw(2) << std::setfill('0') << byte;
+        if (i % 16 == 0) {
+            os << " ";
+        }
+    }
+
+    os << "]";
+
+    return os;
+}
+

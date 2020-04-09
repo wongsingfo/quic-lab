@@ -2,8 +2,8 @@
 // Created by Chengke Wong on 2020/4/9.
 //
 
-#ifndef TRANSPORT_CID_H
-#define TRANSPORT_CID_H
+#ifndef TRANSPORT_TYPES_H
+#define TRANSPORT_TYPES_H
 
 #include "util/string.h"
 #include "util/utility.h"
@@ -28,18 +28,19 @@ public:
         : String(std::forward<Args>(args)...)
         {}
 
-    static Cid from_reader(StringReader &reader) {
-        uint8_t length = reader.read_u8();
-        if (length > 20) {
-            throw error_discard_packet("the CID is longer than 20 bytes");
-        }
-
-        Cid result(length);
-        reader.read(result, length);
-
-        return result;
-    }
-
+    static Cid from_reader(StringReader &reader);
 };
 
-#endif //TRANSPORT_CID_H
+class Token : public String {
+
+public:
+    template<typename... Args>
+    explicit Token(Args &&... args)
+        : String(std::forward<Args>(args)...)
+        {}
+
+    static Token from_reader(StringReader &reader);
+};
+
+
+#endif //TRANSPORT_TYPES_H

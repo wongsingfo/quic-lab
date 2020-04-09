@@ -82,3 +82,12 @@ TEST_F(StringReaderTest, Test03) {
         37
     );
 }
+
+TEST_F(StringReaderTest, Test04) {
+    StringReader reader(String::from_hex("25"));
+    EXPECT_EQ(
+        reader.read_with_variant_length(),
+        37
+    );
+}
+

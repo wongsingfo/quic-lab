@@ -48,13 +48,19 @@ PacketHeader PacketHeader::long_packet_from_reader(StringReader &reader) {
     Cid scid = Cid::from_reader(reader);
 
     PacketHeader result(std::move(scid), std::move(dcid));
-    result.type_ = type;
-    result.version_ = version;
+    result.type = type;
+    result.version = version;
 
     if (type == PacketType::Initial) {
-
+        result.token = Token::from_reader(reader);
+        result.length = reader.read_with_variant_length();
     }
 
     return result;
+}
+
+void PacketHeader::decrypt(String hp) {
+// In sampling the packet ciphertext, the Packet Number field is assumed to
+// be 4 bytes long (its maximum possible encoded length).
 }
 

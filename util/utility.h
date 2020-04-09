@@ -2,6 +2,8 @@
 #define UTILITY_H
 
 #include <memory>
+#include <sstream>
+#include <iostream>
 
 namespace std {
 
@@ -18,6 +20,12 @@ inline void dynamic_check(bool flag) {
     } else {
         // ok
     }
+}
+
+using log_stream = std::ostream;
+
+inline log_stream &log_debug() {
+    return std::cerr;
 }
 
 #endif

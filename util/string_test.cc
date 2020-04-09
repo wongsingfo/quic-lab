@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
+
 #include "util/string.h"
+#include "util/string_reader.h"
 
 class StringTest : public ::testing::Test {
 protected:
@@ -45,3 +47,38 @@ TEST_F(StringTest, Test06) {
     );
 }
 
+class StringReaderTest : public ::testing::Test {
+protected:
+    StringReaderTest() = default;
+    ~StringReaderTest() override = default;
+
+    void SetUp() override {
+    }
+
+    void TearDown() override {
+    };
+};
+
+TEST_F(StringReaderTest, Test01) {
+    StringReader reader(String::from_hex("c2 19 7c 5e ff 14 e8 8c"));
+    EXPECT_EQ(
+        reader.read_with_variant_length(),
+        151288809941952652
+    );
+}
+
+TEST_F(StringReaderTest, Test02) {
+    StringReader reader(String::from_hex("25"));
+    EXPECT_EQ(
+        reader.read_with_variant_length(),
+        37
+    );
+}
+
+TEST_F(StringReaderTest, Test03) {
+    StringReader reader(String::from_hex("40 25"));
+    EXPECT_EQ(
+        reader.read_with_variant_length(),
+        37
+    );
+}

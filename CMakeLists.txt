@@ -49,17 +49,19 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 include_directories(.)
 add_subdirectory(crypto)
 add_subdirectory(util)
+add_subdirectory(transport)
 
-set(test_source 
-	crypto/hkdf_test.cc
-	util/string_test.cc)
+set(test_source
+        crypto/hkdf_test.cc
+        util/string_test.cc
+        transport/packet_test.cc)
 
 
 # set up gtest
 include(GoogleTest)
 enable_testing()
 add_executable(tests tests.cpp ${test_source})
-target_link_libraries(tests gtest_main crypto util OpenSSL::Crypto)
+target_link_libraries(tests gtest_main crypto transport util OpenSSL::Crypto)
 gtest_discover_tests(tests)
 
 

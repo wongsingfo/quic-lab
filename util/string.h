@@ -41,6 +41,10 @@ public:
     inline dtype* data() const { return data_; }
     inline size_t size() const { return size_; }
 
+    String clone() const {
+        return String(data(), size());
+    }
+
     String(String &&other) noexcept {
         data_ = other.data();
         size_ = other.size();

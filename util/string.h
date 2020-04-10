@@ -52,11 +52,19 @@ public:
     }
 
     String& operator = (String &&other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+
+        delete[] data_;
+
         data_ = other.data();
         size_ = other.size();
         other.reset();
         return *this;
     }
+
+    bool operator == (const String& other) const noexcept;
 
     // Construct a String from a human-readable representation. The
     // text must end with \0.

@@ -1,3 +1,4 @@
-add_library(crypto STATIC 
-	hkdf.cc)
+add_library(crypto STATIC
+        hkdf.cc
+        aead.cc)
 

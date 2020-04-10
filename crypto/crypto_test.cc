@@ -1,12 +1,14 @@
 #include "gtest/gtest.h"
+
 #include "hkdf.h"
+#include "aead.h"
 
 namespace crypto {
 
-class HkdfTest : public ::testing::Test {
+class CryptoTest : public ::testing::Test {
 protected:
-    HkdfTest() = default;
-    ~HkdfTest() override = default;
+    CryptoTest() = default;
+    ~CryptoTest() override = default;
 
     void SetUp() override {
     }
@@ -31,7 +33,7 @@ protected:
         String::from_hex("a980b8b4fb7d9fbc13e814c23164253d");
 };
 
-TEST_F(HkdfTest, Test01) {
+TEST_F(CryptoTest, Test01) {
     String output =
         hkdf(String::from_hex("0x000102030405060708090a0b0c"),
              String::from_hex("0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"),
@@ -44,7 +46,7 @@ TEST_F(HkdfTest, Test01) {
               "34007208d5b887185865");
 }
 
-TEST_F(HkdfTest, ClientInSecret) {
+TEST_F(CryptoTest, ClientInSecret) {
 
     String output =
         hkdf_label(initial_salt,
@@ -58,7 +60,7 @@ TEST_F(HkdfTest, ClientInSecret) {
               client_initial_secret.to_hex());
 }
 
-TEST_F(HkdfTest, ClientHPSecret) {
+TEST_F(CryptoTest, ClientHPSecret) {
     String output =
         hkdf_expand_label( client_initial_secret,
                            String::from_text("quic hp"),
@@ -67,8 +69,20 @@ TEST_F(HkdfTest, ClientHPSecret) {
 
     EXPECT_EQ(output.size(), 16);
 
-    EXPECT_EQ(output.to_hex(),
-              client_hp.to_hex());
+    EXPECT_EQ(output,
+              client_hp);
+}
+
+// https://github.com/openssl/openssl/blob/f7382fbbd846dd3bdea6b8c03b6af22faf0ab94f/test/recipes/30-test_evp_data/evpciph.txt
+TEST_F(CryptoTest, Cipher_AES_128_ECB) {
+    String key = String::from_hex("2B7E151628AED2A6ABF7158809CF4F3C");
+    String plain = String::from_hex("F69F2445DF4F9B17AD2B417BE66C3710");
+    String cipher = String::from_hex("7B0C785E27E8AD3F8223207104725DD4");
+    EXPECT_EQ(aes_128_ecb_decrypt(key, cipher), plain);
+    EXPECT_EQ(aes_128_ecb_encrypt(key, plain), cipher);
+}
+
+TEST_F(CryptoTest, DecodeHeaderProtection) {
 }
 
 } // namespace crypto

@@ -63,6 +63,14 @@ String String::from_text(const char *text) {
     return String(text, strlen(text));
 }
 
+bool String::operator == (const String &other) const noexcept {
+    if (size() != other.size()) {
+        return false;
+    }
+
+    return 0 == memcmp(data(), other.data(), size());
+}
+
 std::ostream &operator<<(std::ostream &os, const String &self) {
     int size = self.size();
     os << "[";
@@ -71,12 +79,15 @@ std::ostream &operator<<(std::ostream &os, const String &self) {
     String::dtype *first = self.data();
     String::dtype *last = first + size;
 
+    os << std::hex;
+
     for (int i = 0; first != last; first++, i++) {
-        int byte = (int) *first;
-        os << std::setw(2) << std::setfill('0') << byte;
-        if (i % 16 == 0) {
+        if (i > 0 && i % 8 == 0) {
             os << " ";
         }
+
+        int byte = (int) *first;
+        os << std::setw(2) << std::setfill('0') << byte;
     }
 
     os << "]";

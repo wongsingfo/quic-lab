@@ -52,7 +52,7 @@ add_subdirectory(util)
 add_subdirectory(transport)
 
 set(test_source
-        crypto/hkdf_test.cc
+        crypto/crypto_test.cc
         util/string_test.cc
         transport/packet_test.cc)
 

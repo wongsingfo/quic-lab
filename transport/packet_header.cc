@@ -3,7 +3,7 @@
 //
 
 #include "transport/packet_header.h"
-
+#include "crypto/aead.h"
 
 static inline bool is_long_packet(uint8_t first_byte) {
     // The most significant bit (0x80) of byte 0 (the first byte) is set to 1 for long headers
@@ -54,13 +54,31 @@ PacketHeader PacketHeader::long_packet_from_reader(StringReader &reader) {
     if (type == PacketType::Initial) {
         result.token = Token::from_reader(reader);
         result.length = reader.read_with_variant_length();
+        result.header_length = reader.position();
     }
 
     return result;
 }
 
-void PacketHeader::decrypt(String hp) {
-// In sampling the packet ciphertext, the Packet Number field is assumed to
-// be 4 bytes long (its maximum possible encoded length).
+void PacketHeader::decrypt(String &hp, StringReader &packet) {
+    // In sampling the packet ciphertext, the Packet Number field is assumed to
+    // be 4 bytes long (its maximum possible encoded length).
+    String sample = packet.sub_string(header_length + 4,
+                                      header_length + 4 + 16);
+
+    String mask = crypto::aes_128_ecb_encrypt(hp, sample);
+    uint8_t first_byte = packet.peek_u8();
+    if (is_long_packet(first_byte)) {
+        first_byte ^= mask[0] & 0x0f;
+    } else {
+        first_byte ^= mask[0] & 0x1f;
+    }
+    packet[0] = first_byte;
+
+    int pn_length = (first_byte & 0x03) + 1;
+    int pn_offset = header_length;
+    for (int i = 0; i < pn_length; i++) {
+        packet[pn_offset + i] ^= mask[1 + i];
+    }
 }
 

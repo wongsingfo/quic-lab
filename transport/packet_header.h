@@ -40,6 +40,9 @@ struct PacketHeader {
     // the length includes both the Packet Number and Payload fields
     size_t length;
 
+    // starting from the first byte up to but not including packet number
+    size_t header_length;
+
     // only present in VersionNegotiation
     optional< std::vector<Version> > versions_;
 
@@ -59,7 +62,7 @@ struct PacketHeader {
     /* The header protection algorithm uses both the header protection key
      * and a sample of the ciphertext from the packet Payload field. */
 
-    void decrypt(String hp);
+    void decrypt(String &hp, StringReader &packet);
 
     static PacketHeader from_reader(StringReader &reader);
 

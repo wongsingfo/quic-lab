@@ -5,6 +5,8 @@
 #include <cstring>
 #include <string>
 
+#include "util/utility.h"
+
 class String {
 
 public:
@@ -73,6 +75,16 @@ public:
     static String from_hex(const char* text);
 
     static String from_text(const char* text);
+
+    inline String sub_string(size_t begin, size_t end) const {
+        dynamic_check(begin <= end && end <= size());
+        return String(data() + begin, end - begin);
+    }
+
+    inline dtype& operator [] (size_t i) const {
+        dynamic_check(i <= size());
+        return data_[i];
+    }
 
     inline static String empty_string() {
         return String(0);

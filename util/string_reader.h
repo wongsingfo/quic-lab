@@ -26,6 +26,8 @@ public:
 
     void read(const dtype* data, size_t length);
 
+    inline size_t position() const { return position_; }
+
     uint64_t read_with_variant_length();
 
     inline void read(String &dest, size_t length) {

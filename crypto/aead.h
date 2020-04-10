@@ -13,7 +13,7 @@ namespace crypto {
 // 16 bytes larger than their input.
 enum class AeadAlgorithm {
     // conform to the IANA Consideration
-        AEAD_AES_128_GCM = 1,
+    AEAD_AES_128_GCM = 1,
     AEAD_AES_256_GCM = 2,
     AEAD_AES_128_CCM = 3,
     AEAD_AES_256_CCM = 4,

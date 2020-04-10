@@ -19,6 +19,9 @@ protected:
     };
 
     // https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-client-initial
+    // The client sends an Initial packet. The unprotected payload of this
+    // packet contains the following CRYPTO frame, plus enough PADDING frames
+    // to make a 1162 byte payload:
     String initial_packet = String::from_hex(
         "c0ff00001b088394c8f03e5157080000 449e3b343aa8535064a4268a0d9d7b1c\n"
         "9d250ae355162276e9b1e3011ef6bbc0 ab48ad5bcc2681e953857ca62becd752\n"
@@ -59,6 +62,17 @@ protected:
         "13c8b3d97b1a77b2ac3af745d61a34cc 4709865bac824a94bb19058015e4e42d\n"
         "38d3b779d72edc00c5cd088eff802b05");
 
+    // https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-server-initial
+    // The server sends the following payload in response, including an ACK
+    // frame, a CRYPTO frame, and no PADDING frames
+    String server_initial = String::from_hex(
+        "0d0000000018410a020000560303eefc e7f7b37ba1d1632e96677825ddf73988\n"
+        "cfc79825df566dc5430b9a045a120013 0100002e00330024001d00209d3c940d\n"
+        "89690b84d08a60993c144eca684d1081 287c834d5311bcf32bb9da1a002b0002\n"
+        "0304");
+
+    String client_hp =
+        String::from_hex("a980b8b4fb7d9fbc13e814c23164253d");
 };
 
 TEST_F(PacketTest, DecodeHeader) {
@@ -68,5 +82,37 @@ TEST_F(PacketTest, DecodeHeader) {
 
     EXPECT_EQ(header.token.value().size(), 0);
     EXPECT_EQ(header.length, 1182);
+    EXPECT_EQ(header.scid.to_hex(), "");
+    EXPECT_EQ(header.dcid.to_hex(), "8394c8f03e515708");
 }
 
+TEST_F(PacketTest, DecodeHeader2) {
+    StringReader reader(server_initial);
+    PacketHeader header =
+        PacketHeader::from_reader(reader);
+
+    EXPECT_EQ(header.token.value().size(), 0);
+    EXPECT_EQ(header.length, 1182);
+    EXPECT_EQ(header.scid.to_hex(), "");
+    EXPECT_EQ(header.dcid.to_hex(), "8394c8f03e515708");
+}
+
+TEST_F(PacketTest, DecryptHeader) {
+    StringReader reader(initial_packet);
+    PacketHeader header =
+        PacketHeader::from_reader(reader);
+    String hp = String::from_hex("a980b8b4fb7d9fbc13e814c23164253d");
+    header.decrypt(hp, reader);
+    EXPECT_EQ(header.pkt_number.value, 2);
+    EXPECT_EQ(header.payload_offset(), 22);
+}
+
+TEST_F(PacketTest, DecryptHeader2) {
+    StringReader reader(server_initial);
+    PacketHeader header =
+        PacketHeader::from_reader(reader);
+    String hp = String::from_hex("a980b8b4fb7d9fbc13e814c23164253d");
+    header.decrypt(hp, reader);
+    EXPECT_EQ(header.pkt_number.value, 2);
+    EXPECT_EQ(header.payload_offset(), 22);
+}

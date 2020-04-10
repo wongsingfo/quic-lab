@@ -42,5 +42,18 @@ public:
     static Token from_reader(StringReader &reader);
 };
 
+class PacketNumber {
+
+public:
+
+    PacketNumber() = default;
+
+    using dtype = uint64_t;
+
+    dtype value;
+
+    static PacketNumber::dtype from_string(StringRef s, size_t length);
+
+};
 
 #endif //TRANSPORT_TYPES_H

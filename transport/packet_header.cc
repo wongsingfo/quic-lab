@@ -76,9 +76,27 @@ void PacketHeader::decrypt(StringRef hp, StringRef packet) {
     packet[0] = first_byte;
 
     int pn_length = (first_byte & 0x03) + 1;
+
+    pkt_num_len = pn_length;
+
     int pn_offset = header_length;
     for (int i = 0; i < pn_length; i++) {
         packet[pn_offset + i] ^= mask[1 + i];
     }
+
+    // Two bits (those with a mask of 0x0c) of byte 0 are reserved across
+    // multiple packet types. These bits are protected using header protection
+    // (see Section 5.4 of [QUIC-TLS]). The value included prior to protection
+    // MUST be set to 0.
+
+    if (first_byte & 0x0c) {
+        throw error_protocol_violation("The Reserved Bits is not zero");
+    }
+
+    // Now the header decryption is done; we next need to recover
+    // the missing data.
+    pkt_number.value = PacketNumber::from_string(
+        packet.sub_string(header_length), pn_length);
+
 }
 

@@ -26,7 +26,6 @@ enum class PacketType {
 };
 
 using Version = uint32_t;
-using PacketNumber = uint64_t;
 
 using std::experimental::optional;
 
@@ -53,7 +52,7 @@ struct PacketHeader {
     PacketNumber pkt_number;
 
     // only present in Initial and Retry
-    optional< String > token;
+    optional<String> token;
 
     PacketHeader(Cid &&scid, Cid &&dcid)
         : scid(std::move(scid)),
@@ -67,6 +66,10 @@ struct PacketHeader {
     static PacketHeader from_reader(StringReader &reader);
 
     static PacketHeader long_packet_from_reader(StringReader &reader);
+
+    inline size_t payload_offset() const {
+        return pkt_num_len + header_length;
+    }
 };
 
 

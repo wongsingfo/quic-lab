@@ -31,6 +31,10 @@ public:
         return StringRef(data() + begin, end - begin);
     }
 
+    inline StringRef sub_string(size_t begin) const {
+        return sub_string(begin, size());
+    }
+
     inline dtype& operator [] (size_t i) const {
         dynamic_check(i <= size());
         return data_[i];

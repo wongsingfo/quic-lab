@@ -60,6 +60,28 @@ TEST_F(CryptoTest, ClientInSecret) {
               client_initial_secret.to_hex());
 }
 
+TEST_F(CryptoTest, ServerInitialHP) {
+    String initial_salt_server =
+        hkdf_label(initial_salt,
+                   DCID,
+                   String::from_text("server in"),
+                   32);
+
+    EXPECT_EQ(initial_salt_server.to_hex(),
+              "fda3953aecc040e48b34e27ef87de3a6");
+
+    String output =
+        hkdf_expand_label(initial_salt_server,
+                          DCID,
+                          String::from_text("quic hp"),
+                          16);
+
+    EXPECT_EQ(output.size(), 16);
+
+    EXPECT_EQ(output.to_hex(),
+              "a8ed82e6664f865aedf6106943f95fb8");
+}
+
 TEST_F(CryptoTest, ClientHPSecret) {
     String output =
         hkdf_expand_label( client_initial_secret,

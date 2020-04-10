@@ -17,4 +17,14 @@ public:
 
 };
 
+class error_protocol_violation : public std::runtime_error {
+
+public:
+    template<typename... Args>
+    explicit error_protocol_violation(Args&&... args)
+        : std::runtime_error(std::forward<Args>(args)...)
+    {}
+
+};
+
 #endif //TRANSPORT_EXCEPTION_H

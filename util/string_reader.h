@@ -7,7 +7,7 @@
 
 #include "util/string.h"
 
-class StringReader : public String {
+class StringReader : public StringRef {
 
 private:
 
@@ -15,8 +15,8 @@ private:
 
 public:
 
-    StringReader(const dtype* data, size_t size)
-        : String(data, size),
+    StringReader(dtype* data, size_t size)
+        : StringRef(data, size),
           position_(0)
     {}
 

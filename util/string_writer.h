@@ -7,6 +7,8 @@
 
 #include "util/string.h"
 
+// The writer owns the |data_| so it is derived from String
+// rather than StringRef
 class StringWriter : public String {
 
 private:
@@ -24,7 +26,7 @@ public:
 
     void write(const char* text);
 
-    void write(const String &s);
+    void write(StringRef s);
 
     void write_u8(uint8_t value);
     void write_u16(uint16_t value);

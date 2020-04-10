@@ -49,7 +49,9 @@ enum class AeadAlgorithm {
  *    Length: [0, A_MAX];
  */
 
-String aes_128_ecb_encrypt(String &key, String &ciphertext);
+// https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption
+
+String aes_128_ecb_encrypt(StringRef key, StringRef ciphertext);
 
 /*
  * The authenticated decryption operation has four inputs: K, N, A, and C,
@@ -60,7 +62,7 @@ String aes_128_ecb_encrypt(String &key, String &ciphertext);
  * key.
  */
 
-String aes_128_ecb_decrypt(String &key, String &ciphertext);
+String aes_128_ecb_decrypt(StringRef key, StringRef ciphertext);
 
 /* Packet Protection
  * https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-aead-usage

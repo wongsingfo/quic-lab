@@ -30,15 +30,15 @@ namespace crypto {
  */
 
 
-String hkdf_extract(const String &salt,
-                    const String &ikm);
+String hkdf_extract(StringRef salt,
+                    StringRef ikm);
 
-String hkdf_expand(const String &prk, const String &info, size_t length);
+String hkdf_expand(StringRef prk, StringRef info, size_t length);
 
 // a wrapper function hkdf_extract() and hkdf_expand()
-String hkdf(const String &salt,
-            const String &secret,
-            const String &info,
+String hkdf(StringRef salt,
+            StringRef secret,
+            StringRef info,
             size_t length);
 
 /*
@@ -60,15 +60,15 @@ String hkdf(const String &salt,
  * In QUIC, the `context` is always empty.
  */
 
-String hkdf_expand_label(const String &prk,
-                         const String &label,
-                         const String &context,
+String hkdf_expand_label(StringRef prk,
+                         StringRef label,
+                         StringRef context,
                          size_t length);
 
 // a wrapper function for hkdf_extract() and hkdf_expand_label()
-String hkdf_label(const String &salt,
-                  const String &secret,
-                  const String &label,
+String hkdf_label(StringRef salt,
+                  StringRef secret,
+                  StringRef label,
                   size_t length);
 
 }

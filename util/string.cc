@@ -47,7 +47,7 @@ String String::from_hex(const char* text) {
 
 }
 
-std::string String::to_hex() const {
+std::string StringRef::to_hex() const {
     std::stringstream stream;
     stream << std::hex;
 
@@ -59,11 +59,11 @@ std::string String::to_hex() const {
     return stream.str();
 }
 
-String String::from_text(const char *text) {
+StringRef StringRef::from_text(const char *text) {
     return String(text, strlen(text));
 }
 
-bool String::operator == (const String &other) const noexcept {
+bool StringRef::operator == (const StringRef &other) const noexcept {
     if (size() != other.size()) {
         return false;
     }
@@ -71,13 +71,13 @@ bool String::operator == (const String &other) const noexcept {
     return 0 == memcmp(data(), other.data(), size());
 }
 
-std::ostream &operator<<(std::ostream &os, const String &self) {
+std::ostream &operator<<(std::ostream &os, const StringRef &self) {
     int size = self.size();
     os << "[";
 //    os <<  self.size() << " ";
 
-    String::dtype *first = self.data();
-    String::dtype *last = first + size;
+    StringRef::dtype *first = self.data();
+    StringRef::dtype *last = first + size;
 
     os << std::hex;
 

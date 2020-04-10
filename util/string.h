@@ -7,10 +7,54 @@
 
 #include "util/utility.h"
 
-class String {
+class StringRef {
 
 public:
-    using dtype = unsigned char;
+    using dtype = uint8_t;
+
+    StringRef(dtype* data, size_t size)
+        : data_(data), size_(size)
+        {}
+
+    ~StringRef() = default;
+
+    inline dtype* data() const { return data_; }
+    inline size_t size() const { return size_; }
+
+    bool operator == (const StringRef& other) const noexcept;
+
+    // the |text| must be a static data
+    static StringRef from_text(const char* text);
+
+    inline StringRef sub_string(size_t begin, size_t end) const {
+        dynamic_check(begin <= end && end <= size());
+        return StringRef(data() + begin, end - begin);
+    }
+
+    inline dtype& operator [] (size_t i) const {
+        dynamic_check(i <= size());
+        return data_[i];
+    }
+
+    inline static StringRef empty_string() {
+        return StringRef(nullptr, 0);
+    }
+
+    // for testing and debugging
+    std::string to_hex() const;
+
+    friend std::ostream& operator<<(std::ostream& os, const StringRef& self);
+
+protected:
+
+    int size_;
+    dtype* data_;
+
+};
+
+class String : public StringRef {
+
+public:
 
     String(const dtype* data, size_t size)
         : String(size) {
@@ -21,35 +65,26 @@ public:
         : String((dtype*)data, size) {}
 
     explicit String(size_t size)
-        : size_(size),
-          data_(new dtype[size])
-        {}
+        : StringRef(new dtype[size], size)
+    {}
 
-    ~String() {
-        delete[] data_;
-    }
+    // Construct a String from a human-readable representation. The
+    // text must end with \0.
+    //
+    // For example, 0x12ff, 12ff
+    static String from_hex(const char* text);
 
     inline void reset() {
         data_ = nullptr;
         size_ = 0;
     }
 
-    inline String copy() {
-        return String(data_, size_);
+    ~String() {
+        delete[] data_;
     }
 
-    std::string to_hex() const;
-
-    inline dtype* data() const { return data_; }
-    inline size_t size() const { return size_; }
-
-    String clone() const {
-        return String(data(), size());
-    }
-
-    String(String &&other) noexcept {
-        data_ = other.data();
-        size_ = other.size();
+    String(String &&other) noexcept
+     : StringRef(other.data(), other.size()) {
         other.reset();
     }
 
@@ -66,40 +101,9 @@ public:
         return *this;
     }
 
-    bool operator == (const String& other) const noexcept;
-
-    // Construct a String from a human-readable representation. The
-    // text must end with \0.
-    //
-    // For example, 0x12ff, 12ff
-    static String from_hex(const char* text);
-
-    static String from_text(const char* text);
-
-    inline String sub_string(size_t begin, size_t end) const {
-        dynamic_check(begin <= end && end <= size());
-        return String(data() + begin, end - begin);
-    }
-
-    inline dtype& operator [] (size_t i) const {
-        dynamic_check(i <= size());
-        return data_[i];
-    }
-
-    inline static String empty_string() {
-        return String(0);
-    }
-
     // disallow copy and assignment
     String (const String&) = delete;
     String& operator=(const String&) = delete;
-
-    friend std::ostream& operator<<(std::ostream& os, const String& self);
-
-private:
-
-    int size_;
-    dtype* data_;
 
 };
 

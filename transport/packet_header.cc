@@ -60,14 +60,14 @@ PacketHeader PacketHeader::long_packet_from_reader(StringReader &reader) {
     return result;
 }
 
-void PacketHeader::decrypt(String &hp, StringReader &packet) {
+void PacketHeader::decrypt(StringRef hp, StringRef packet) {
     // In sampling the packet ciphertext, the Packet Number field is assumed to
     // be 4 bytes long (its maximum possible encoded length).
-    String sample = packet.sub_string(header_length + 4,
-                                      header_length + 4 + 16);
+    StringRef sample = packet.sub_string(header_length + 4,
+                                         header_length + 4 + 16);
 
     String mask = crypto::aes_128_ecb_encrypt(hp, sample);
-    uint8_t first_byte = packet.peek_u8();
+    uint8_t first_byte = packet[0];
     if (is_long_packet(first_byte)) {
         first_byte ^= mask[0] & 0x0f;
     } else {

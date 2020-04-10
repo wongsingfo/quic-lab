@@ -62,7 +62,7 @@ struct PacketHeader {
     /* The header protection algorithm uses both the header protection key
      * and a sample of the ciphertext from the packet Payload field. */
 
-    void decrypt(String &hp, StringReader &packet);
+    void decrypt(StringRef hp, StringRef packet);
 
     static PacketHeader from_reader(StringReader &reader);
 

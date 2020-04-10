@@ -14,7 +14,7 @@ namespace crypto {
 namespace openssl {
 
 static String aes_ecb(const EVP_CIPHER *(*method)(),
-                      String &key, String &test,
+                      StringRef key, StringRef test,
                       bool is_encrypt) {
     if (key.size() != 16) {
         throw std::invalid_argument("key length should be of 16");
@@ -45,11 +45,11 @@ static String aes_ecb(const EVP_CIPHER *(*method)(),
 
 } // namespace openssl
 
-String aes_128_ecb_decrypt(String &key, String &ciphertext) {
+String aes_128_ecb_decrypt(StringRef key, StringRef ciphertext) {
     return openssl::aes_ecb(EVP_aes_128_ecb, key, ciphertext, false);
 }
 
-String aes_128_ecb_encrypt(String &key, String &ciphertext) {
+String aes_128_ecb_encrypt(StringRef key, StringRef ciphertext) {
     return openssl::aes_ecb(EVP_aes_128_ecb, key, ciphertext, true);
 }
 

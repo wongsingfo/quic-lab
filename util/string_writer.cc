@@ -20,7 +20,7 @@ void StringWriter::write(const char *text) {
     write((dtype*) text, strlen(text));
 }
 
-void StringWriter::write(const String &s) {
+void StringWriter::write(const StringRef s) {
     write(s.data(), s.size());
 }
 

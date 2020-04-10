@@ -51,7 +51,7 @@ static void HKDF_Extract(const EVP_MD *evp_md,
         throw std::invalid_argument("wrong output buffer size");
     }
     /* calc: PRK = HMAC-Hash(salt, IKM) */
-    if (HMAC(evp_md, salt, salt_len, ikm, ikm_len, prk, NULL) == NULL) {
+    if (HMAC(evp_md, salt, salt_len, ikm, ikm_len, prk, nullptr) == nullptr) {
         throw openssl_error("HMAC", 0);
     }
 }
@@ -115,13 +115,13 @@ static void HKDF_Expand(const EVP_MD *evp_md,
     if (okm_len % dig_len)
         n++;
 
-    if (n > 255 || okm == NULL)
+    if (n > 255 || okm == nullptr)
         throw std::invalid_argument("okm");
 
-    if ((hmac = HMAC_CTX_new()) == NULL)
+    if ((hmac = HMAC_CTX_new()) == nullptr)
         throw std::invalid_argument("hmac");
 
-    if (!HMAC_Init_ex(hmac, prk, prk_len, evp_md, NULL))
+    if (!HMAC_Init_ex(hmac, prk, prk_len, evp_md, nullptr))
         goto err;
 
     for (i = 1; i <= n; i++) {
@@ -130,7 +130,7 @@ static void HKDF_Expand(const EVP_MD *evp_md,
 
         /* calc: T(i) = HMAC-Hash(PRK, T(i - 1) | info | i) */
         if (i > 1) {
-            if (!HMAC_Init_ex(hmac, NULL, 0, NULL, NULL))
+            if (!HMAC_Init_ex(hmac, nullptr, 0, nullptr, nullptr))
                 goto err;
 
             if (!HMAC_Update(hmac, prev, dig_len))
@@ -143,7 +143,7 @@ static void HKDF_Expand(const EVP_MD *evp_md,
         if (!HMAC_Update(hmac, &ctr, 1))
             goto err;
 
-        if (!HMAC_Final(hmac, prev, NULL))
+        if (!HMAC_Final(hmac, prev, nullptr))
             goto err;
 
         copy_len = (done_len + dig_len > okm_len) ?
@@ -213,9 +213,9 @@ static void HKDF(const EVP_MD *evp_md,
     OPENSSL_cleanse(prk, sizeof(prk));
 }
 
-String hkdf(const String &salt,
-            const String &secret,
-            const String &info,
+String hkdf(const StringRef salt,
+            const StringRef secret,
+            const StringRef info,
             size_t length) {
     // https://www.openssl.org/docs/man1.1.0/man3/EVP_PKEY_CTX_set_hkdf_md.html
 
@@ -231,8 +231,11 @@ String hkdf(const String &salt,
     return output;
 }
 
-String hkdf_label(const String &salt, const String &secret, const String &label,
+String hkdf_label(const StringRef salt,
+                  const StringRef secret,
+                  const StringRef label,
                   size_t length) {
+
     constexpr const char* prepend = "tls13 ";
     StringWriter info(sizeof(uint16_t) +
                       1 + strlen(prepend) + label.size() +
@@ -245,7 +248,7 @@ String hkdf_label(const String &salt, const String &secret, const String &label,
     return hkdf(salt, secret, info, length);
 }
 
-String hkdf_expand(const String &prk, const String &info, size_t length) {
+String hkdf_expand(const StringRef prk, const StringRef info, size_t length) {
     String result(length);
     HKDF_Expand(EVP_sha256(),
         prk.data(), prk.size(),
@@ -254,9 +257,9 @@ String hkdf_expand(const String &prk, const String &info, size_t length) {
     return result;
 }
 
-String hkdf_expand_label(const String &prk,
-                         const String &label,
-                         const String &context,
+String hkdf_expand_label(const StringRef prk,
+                         const StringRef label,
+                         const StringRef context,
                          size_t length) {
     constexpr const char* prepend = "tls13 ";
     StringWriter info(sizeof(uint16_t) +

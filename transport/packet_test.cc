@@ -66,10 +66,11 @@ protected:
     // The server sends the following payload in response, including an ACK
     // frame, a CRYPTO frame, and no PADDING frames
     String server_initial = String::from_hex(
-        "0d0000000018410a020000560303eefc e7f7b37ba1d1632e96677825ddf73988\n"
-        "cfc79825df566dc5430b9a045a120013 0100002e00330024001d00209d3c940d\n"
-        "89690b84d08a60993c144eca684d1081 287c834d5311bcf32bb9da1a002b0002\n"
-        "0304");
+        "c9ff00001b0008f067a5502a4262b500 4074168bf22b7002596f99ae67abf65a\n"
+        "5852f54f58c37c808682e2e40492d8a3 899fb04fc0afe9aabc8767b18a0aa493\n"
+        "537426373b48d502214dd856d63b78ce e37bc664b3fe86d487ac7a77c53038a3\n"
+        "cd32f0b5004d9f5754c4f7f2d1f35cf3 f7116351c92bd8c3a9528d2b6aca20f0\n"
+        "8047d9f017f0");
 
     String client_hp =
         String::from_hex("a980b8b4fb7d9fbc13e814c23164253d");
@@ -92,9 +93,10 @@ TEST_F(PacketTest, DecodeHeader2) {
         PacketHeader::from_reader(reader);
 
     EXPECT_EQ(header.token.value().size(), 0);
-    EXPECT_EQ(header.length, 1182);
-    EXPECT_EQ(header.scid.to_hex(), "");
-    EXPECT_EQ(header.dcid.to_hex(), "8394c8f03e515708");
+    EXPECT_EQ(header.header_length, 18);
+    EXPECT_EQ(header.length, 116);
+    EXPECT_EQ(header.scid.to_hex(), "f067a5502a4262b5");
+    EXPECT_EQ(header.dcid.to_hex(), "");
 }
 
 TEST_F(PacketTest, DecryptHeader) {
@@ -111,8 +113,9 @@ TEST_F(PacketTest, DecryptHeader2) {
     StringReader reader(server_initial);
     PacketHeader header =
         PacketHeader::from_reader(reader);
-    String hp = String::from_hex("a980b8b4fb7d9fbc13e814c23164253d");
+    String hp = String::from_hex("a8ed82e6664f865aedf6106943f95fb8");
     header.decrypt(hp, reader);
-    EXPECT_EQ(header.pkt_number.value, 2);
-    EXPECT_EQ(header.payload_offset(), 22);
+    EXPECT_EQ(header.pkt_number.value, 1);
+    EXPECT_EQ(header.pkt_number_len, 2);
+    EXPECT_EQ(header.payload_offset(), 20);
 }

@@ -77,7 +77,7 @@ void PacketHeader::decrypt(StringRef hp, StringRef packet) {
 
     int pn_length = (first_byte & 0x03) + 1;
 
-    pkt_num_len = pn_length;
+    pkt_number_len = pn_length;
 
     int pn_offset = header_length;
     for (int i = 0; i < pn_length; i++) {
@@ -90,7 +90,7 @@ void PacketHeader::decrypt(StringRef hp, StringRef packet) {
     // MUST be set to 0.
 
     if (first_byte & 0x0c) {
-        throw error_protocol_violation("The Reserved Bits is not zero");
+        throw error_protocol_violation("The Reserved Bits are not zero");
     }
 
     // Now the header decryption is done; we next need to recover

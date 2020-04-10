@@ -46,7 +46,7 @@ struct PacketHeader {
     optional< std::vector<Version> > versions_;
 
     // [encrypted] only in long packet header
-    size_t pkt_num_len;
+    size_t pkt_number_len;
 
     // [encrypted]
     PacketNumber pkt_number;
@@ -68,7 +68,7 @@ struct PacketHeader {
     static PacketHeader long_packet_from_reader(StringReader &reader);
 
     inline size_t payload_offset() const {
-        return pkt_num_len + header_length;
+        return pkt_number_len + header_length;
     }
 };
 

@@ -14,12 +14,12 @@ namespace crypto {
 namespace openssl {
 
 static String aes_ecb(const EVP_CIPHER *(*method)(),
-                      StringRef key, StringRef test,
+                      StringRef key, StringRef text,
                       bool is_encrypt) {
     if (key.size() != 16) {
         throw std::invalid_argument("key length should be of 16");
     }
-    if (test.size() != 16) {
+    if (text.size() != 16) {
         throw std::invalid_argument("text length should be of 16");
     }
 
@@ -32,15 +32,62 @@ static String aes_ecb(const EVP_CIPHER *(*method)(),
 
     int out_len;
     String out(16);
-    // https://www.openssl.org/docs/man1.1.0/man3/EVP_aes_128_cbc.html
-    // After this function is called the encryption operation is finished
-    // and no further calls to EVP_EncryptUpdate() should be made.
     openssl_call("EVP_CipherUpdate",
                  EVP_CipherUpdate(ctx, out.data(), &out_len,
-                                  test.data(), test.size()));
+                                  text.data(), text.size()));
     EVP_CIPHER_CTX_free(ctx);
 
     return out;
+}
+
+void aes_128_gcm(StringRef key, StringRef aad,
+                   StringRef nonce,
+                   StringRef text,
+                   StringRef tag,
+                   StringRef output,
+                   bool is_encrypt) {
+    if (nonce.size() != 12) {
+        throw std::invalid_argument("the iv length must be 12 bytes");
+    }
+    if (key.size() != 16) {
+        throw std::invalid_argument("key length should be of 16");
+    }
+    if (tag.size() != 16) {
+        throw std::invalid_argument("tag length should be of 16");
+    }
+    if (text.size() != output.size()) {
+        throw std::invalid_argument("the text lengths differ");
+    }
+
+    int len;
+
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    openssl_call("Initialise the decryption operation",
+                 EVP_CipherInit_ex(ctx, EVP_aes_128_gcm(), nullptr, nullptr, nullptr, is_encrypt));
+    openssl_call("Initialise key and IV",
+                 EVP_CipherInit_ex(ctx, nullptr, nullptr, key.data(), nonce.data(), is_encrypt));
+    openssl_call("Provide any AAD data",
+                 EVP_CipherUpdate(ctx, nullptr, &len, aad.data(), aad.size()));
+
+    openssl_call("EVP_CipherUpdate",
+                 EVP_CipherUpdate(ctx, output.data(), &len,
+                                   text.data(), text.size()));
+    if (! is_encrypt) {
+        openssl_call("set the tag",
+                     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG,
+                                         tag.size(), tag.data()));
+    }
+
+    openssl_call("check the 16-byte tag",
+                 EVP_CipherFinal_ex(ctx, output.data() + len, &len));
+
+    if (is_encrypt) {
+        openssl_call("set the tag",
+                     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG,
+                                         tag.size(), tag.data()));
+    }
+
+    EVP_CIPHER_CTX_free(ctx);
 }
 
 } // namespace openssl
@@ -49,8 +96,32 @@ String aes_128_ecb_decrypt(StringRef key, StringRef ciphertext) {
     return openssl::aes_ecb(EVP_aes_128_ecb, key, ciphertext, false);
 }
 
-String aes_128_ecb_encrypt(StringRef key, StringRef ciphertext) {
-    return openssl::aes_ecb(EVP_aes_128_ecb, key, ciphertext, true);
+String aes_128_ecb_encrypt(StringRef key, StringRef plaintext) {
+    return openssl::aes_ecb(EVP_aes_128_ecb, key, plaintext, true);
+}
+
+String aes_128_gcm_encrypt(StringRef key, StringRef aad,
+                           StringRef nonce,
+                           StringRef plaintext) {
+    String output(plaintext.size() + 16);
+    openssl::aes_128_gcm(key, aad, nonce,
+                         plaintext,
+                         output.sub_string(plaintext.size()),
+                         output.sub_string(0, plaintext.size()),
+                         true);
+    return output;
+}
+
+String aes_128_gcm_decrypt(StringRef key, StringRef aad,
+                           StringRef nonce,
+                           StringRef ciphertext) {
+    String output(ciphertext.size() - 16);
+    openssl::aes_128_gcm(key, aad, nonce,
+                         ciphertext.sub_string(0, ciphertext.size() - 16),
+                         ciphertext.sub_string(ciphertext.size() - 16),
+                         output,
+                         false);
+    return output;
 }
 
 } // namespace crypto

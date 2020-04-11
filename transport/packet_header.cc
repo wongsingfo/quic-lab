@@ -60,6 +60,25 @@ PacketHeader PacketHeader::long_packet_from_reader(StringReader &reader) {
     return result;
 }
 
+/* Packet Header Protection
+ *   This process does not apply to Retry or Version Negotiation packets
+ * https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-header-protection
+ *
+ * hp_key = HKDF_Expand(secret, "quic hp", _, 16)
+ *
+ * Prior to TLS selecting a ciphersuite, AES header protection is used,
+ * matching the AEAD_AES_128_GCM packet protection.
+ *
+ * sample = starting from the payload (the Packet Number field is
+            assumed to be 4 bytes long) up to 16 bytes
+ * mask   = AES-ECB(hp_key, sample)
+ *   - AEAD_AES_128_GCM and AEAD_AES_128_CCM use 128-bit AES in electronic code-book (ECB) mode.
+ *   - AEAD_AES_256_GCM uses 256-bit AES in ECB mode.
+ *
+ * counter= sample[0..3]
+ * nounce = sample[4..15]
+ * mask   = ChaCha20(hp_key, counter, nonce, {0,0,0,0,0})
+ */
 void PacketHeader::decrypt(StringRef hp, StringRef packet) {
     // In sampling the packet ciphertext, the Packet Number field is assumed to
     // be 4 bytes long (its maximum possible encoded length).

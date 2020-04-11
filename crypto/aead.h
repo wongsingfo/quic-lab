@@ -33,14 +33,15 @@ enum class AeadAlgorithm {
  *    A nonce N.  Each nonce provided to distinct invocations of the
  *    Authenticated Encryption operation MUST be distinct, for any
  *    particular value of the key, unless each and every nonce is zero-
- *    length.
+ *    length. (sometimes the nonce is called Initialization Vector (IV))
  *
  *    A plaintext P, which contains the data to be encrypted and
  *    authenticated.
  *    Length: [0, P_MAX], P_MAX >= 2^16
  *
  *    The associated data A, which contains the data to be authenticated, 
- *    but not encrypted.
+ *    but not encrypted. (sometime it is called additional authentication
+ *    data (AAD))
  *    Length: [N_MIN, N_MAX], N_MIN <= 12 <= N_MAX
  *
  * There is a single output:
@@ -51,7 +52,11 @@ enum class AeadAlgorithm {
 
 // https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption
 
-String aes_128_ecb_encrypt(StringRef key, StringRef ciphertext);
+String aes_128_ecb_encrypt(StringRef key, StringRef plaintext);
+
+String aes_128_gcm_encrypt(StringRef key, StringRef aad,
+                           StringRef nonce,
+                           StringRef plaintext);
 
 /*
  * The authenticated decryption operation has four inputs: K, N, A, and C,
@@ -64,6 +69,10 @@ String aes_128_ecb_encrypt(StringRef key, StringRef ciphertext);
 
 String aes_128_ecb_decrypt(StringRef key, StringRef ciphertext);
 
+String aes_128_gcm_decrypt(StringRef key, StringRef aad,
+                           StringRef nonce,
+                           StringRef ciphertext);
+
 /* Packet Protection
  * https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-aead-usage
  *
@@ -74,26 +83,6 @@ String aes_128_ecb_decrypt(StringRef key, StringRef ciphertext);
  * A  = starting from the flags bytes up to and including the unprotected
  *      packet number
  * P  = the payload of the packet
- */
-
-/* Packet Header Protection
- *   This process does not apply to Retry or Version Negotiation packets
- * https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-header-protection
- *
- * hp_key = HKDF_Expand(secret, "quic hp", _, 16)
- *
- * Prior to TLS selecting a ciphersuite, AES header protection is used,
- * matching the AEAD_AES_128_GCM packet protection.
- *
- * sample = starting from the payload (the Packet Number field is
-            assumed to be 4 bytes long) up to 16 bytes
- * mask   = AES-ECB(hp_key, sample)
- *   - AEAD_AES_128_GCM and AEAD_AES_128_CCM use 128-bit AES in electronic code-book (ECB) mode.
- *   - AEAD_AES_256_GCM uses 256-bit AES in ECB mode.
- *
- * counter= sample[0..3]
- * nounce = sample[4..15]
- * mask   = ChaCha20(hp_key, counter, nonce, {0,0,0,0,0})
  */
 
 } // namespace crypto

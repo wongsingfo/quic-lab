@@ -28,6 +28,10 @@ public:
 
     inline size_t position() const { return position_; }
 
+    inline bool empty() const {
+        return position_ == size_;
+    }
+
     uint64_t read_with_variant_length();
 
     inline void read(String &dest, size_t length) {
@@ -36,6 +40,12 @@ public:
 
     inline void read(String &dest) {
         read(dest.data(), dest.size());
+    }
+
+    void skip(size_t length);
+
+    inline dtype* peek_data() const {
+        return this->data() + position_;
     }
 
     uint8_t peek_u8();

@@ -56,4 +56,8 @@ public:
 
 };
 
+using Version = uint32_t;
+
+using Offset = uint64_t;
+
 #endif //TRANSPORT_TYPES_H

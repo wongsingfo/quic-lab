@@ -12,6 +12,8 @@ class StringRef {
 public:
     using dtype = uint8_t;
 
+    StringRef() = default;
+
     StringRef(dtype* data, size_t size)
         : data_(data), size_(size)
         {}
@@ -51,7 +53,7 @@ public:
 
 protected:
 
-    int size_;
+    size_t size_;
     dtype* data_;
 
 };

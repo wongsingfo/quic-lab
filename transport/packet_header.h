@@ -25,8 +25,6 @@ enum class PacketType {
     OneRTT = 5,
 };
 
-using Version = uint32_t;
-
 using std::experimental::optional;
 
 struct PacketHeader {

@@ -72,3 +72,10 @@ uint64_t StringReader::read_with_variant_length() {
             throw std::runtime_error("this should never happen");
     }
 }
+
+void StringReader::skip(size_t length) {
+    position_ += length;
+    if (position_ > size()) {
+        throw std::overflow_error("skip");
+    }
+}

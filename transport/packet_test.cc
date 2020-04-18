@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "util/string.h"
 #include "transport/packet_header.h"
+#include "transport/frame.h"
 
 class PacketTest : public ::testing::Test {
 protected:

@@ -39,4 +39,4 @@ inline int openssl_call(const std::string &s_attempt, int return_value) {
     throw openssl_error(s_attempt, return_value);
 }
 
-}
+} // namespace crypto

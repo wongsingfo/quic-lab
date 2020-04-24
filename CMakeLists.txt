@@ -37,13 +37,19 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-# -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
-# -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib
-find_package(OpenSSL REQUIRED)
-message("OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
-message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
+# add these two variables to help cmake find the openssl 
+#   -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+#   -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib
 
-include_directories(${OPENSSL_INCLUDE_DIR})
+# find_package(OpenSSL REQUIRED)
+# message("OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
+# message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
+# include_directories(${OPENSSL_INCLUDE_DIR})
+
+# BoringSSL
+
+add_subdirectory(boringssl)
+include_directories(boringssl/include)
 
 # quic lab
 include_directories(.)
@@ -61,7 +67,12 @@ set(test_source
 include(GoogleTest)
 enable_testing()
 add_executable(tests tests.cpp ${test_source})
-target_link_libraries(tests gtest_main crypto transport util OpenSSL::Crypto)
+target_link_libraries(tests gtest_main 
+  quictls 
+  transport 
+  util 
+  # OpenSSL::Crypto 
+  ssl)
 gtest_discover_tests(tests)
 
 

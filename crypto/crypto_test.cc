@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
-#include "hkdf.h"
-#include "aead.h"
+#include "crypto/hkdf.h"
+#include "crypto/aead.h"
 
 namespace crypto {
 

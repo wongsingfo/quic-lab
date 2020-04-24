@@ -1,7 +1,8 @@
 #include "crypto/hkdf.h"
 
 /* OpenSSL version: 1.1.0 */
-#include <openssl/kdf.h>
+#include <openssl/hkdf.h>
+#include <openssl/mem.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/err.h>

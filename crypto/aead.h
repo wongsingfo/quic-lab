@@ -7,8 +7,6 @@
 
 #include "util/string.h"
 
-namespace crypto {
-
 // conform to the IANA Consideration
 enum class AeadAlgorithm {
     // https://www.rfc-editor.org/rfc/inline-errata/rfc5116.html
@@ -19,9 +17,13 @@ enum class AeadAlgorithm {
     AEAD_CHACHA20_POLY1305 = 18,
 };
 
-// The ciphersuites used by QUIC all have a 16-byte authentication tag and 
-// produce an output 16 bytes larger than their input.
-constexpr size_t QUIC_AEAD_TAG_LENGTH = 16;
+namespace crypto {
+
+size_t get_tag_length(AeadAlgorithm algo);
+
+size_t get_key_length(AeadAlgorithm algo);
+
+size_t get_iv_length(AeadAlgorithm algo);
 
 /*
  * The authenticated encryption operation has four inputs, each of which is an

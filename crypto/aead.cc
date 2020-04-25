@@ -28,10 +28,10 @@ const EVP_AEAD *get_aead_algorithm(AeadAlgorithm aead) {
 
 // https://commondatastorage.googleapis.com/chromium-boringssl-docs/aead.h.html
 void aead_inplace(const EVP_AEAD *aead, StringRef key,
-    StringRef text, StringRef nonce, StringRef ad,
+    StringRef text, StringRef nonce, StringRef ad, size_t tag_len,
                   bool is_encrypt) {
     EVP_AEAD_CTX *ctx =
-        EVP_AEAD_CTX_new(aead, key.data(), key.size(), QUIC_AEAD_TAG_LENGTH);
+        EVP_AEAD_CTX_new(aead, key.data(), key.size(), tag_len);
     if (ctx == nullptr) {
         throw openssl_error("new ctx failed", 0);
     }
@@ -43,18 +43,18 @@ void aead_inplace(const EVP_AEAD *aead, StringRef key,
                      EVP_AEAD_CTX_seal(ctx, text.data(), &out_len, text.size(),
                                        nonce.data(), nonce.size(),
                                        text.data(),
-                                       text.size() - QUIC_AEAD_TAG_LENGTH,
+                                       text.size() - tag_len,
                                        ad.data(), ad.size()));
         dynamic_check(out_len == text.size());
     } else {
         openssl_call("EVP_AEAD_CTX_open",
                      EVP_AEAD_CTX_open(ctx,
                                        text.data(), &out_len,
-                                       text.size() - QUIC_AEAD_TAG_LENGTH,
+                                       text.size() - tag_len,
                                        nonce.data(), nonce.size(),
                                        text.data(), text.size(),
                                        ad.data(), ad.size()));
-        dynamic_check(out_len + QUIC_AEAD_TAG_LENGTH == text.size());
+        dynamic_check(out_len + tag_len == text.size());
     }
 
     EVP_AEAD_CTX_free(ctx);
@@ -65,13 +65,61 @@ void aead_inplace(const EVP_AEAD *aead, StringRef key,
 void aead_encrypt_inplace(AeadAlgorithm algo, StringRef key,
                           StringRef text, StringRef nonce, StringRef ad) {
     openssl::aead_inplace(openssl::get_aead_algorithm(algo),
-                          key, text, nonce, ad, true);
+                          key, text, nonce, ad,
+                          get_tag_length(algo), true);
 }
 
 void aead_decrypt_inplace(AeadAlgorithm algo, StringRef key,
                           StringRef text, StringRef nonce, StringRef ad) {
     openssl::aead_inplace(openssl::get_aead_algorithm(algo),
-                          key, text, nonce, ad, false);
+                          key, text, nonce, ad,
+                          get_tag_length(algo), false);
+}
+
+
+// The ciphersuites used by QUIC all have a 16-byte authentication tag and
+// produce an output 16 bytes larger than their input.
+size_t get_tag_length(AeadAlgorithm algo) {
+    switch (algo) {
+        case AeadAlgorithm::AEAD_AES_128_GCM:
+            return 16;
+        case AeadAlgorithm::AEAD_AES_256_GCM:
+            return 16;
+        case AeadAlgorithm::AEAD_AES_128_CCM:
+            return 16;
+        case AeadAlgorithm::AEAD_CHACHA20_POLY1305:
+            return 16;
+    }
+}
+
+size_t get_key_length(AeadAlgorithm algo) {
+    switch (algo) {
+        // https://www.rfc-editor.org/rfc/rfc5116.html#section-5
+        case AeadAlgorithm::AEAD_AES_128_GCM:
+            return 16;
+        case AeadAlgorithm::AEAD_AES_256_GCM:
+            return 32;
+        case AeadAlgorithm::AEAD_AES_128_CCM:
+            return 16;
+        case AeadAlgorithm::AEAD_CHACHA20_POLY1305:
+            // https://tools.ietf.org/html/rfc8103#section-1.1
+            return 32;
+    }
+}
+
+size_t get_iv_length(AeadAlgorithm algo) {
+    switch (algo) {
+        // https://www.rfc-editor.org/rfc/rfc5116.html#section-5
+        case AeadAlgorithm::AEAD_AES_128_GCM:
+            return 12;
+        case AeadAlgorithm::AEAD_AES_256_GCM:
+            return 12;
+        case AeadAlgorithm::AEAD_AES_128_CCM:
+            return 12;
+        case AeadAlgorithm::AEAD_CHACHA20_POLY1305:
+            // https://tools.ietf.org/html/rfc8103#section-1.1
+            return 12;
+    }
 }
 
 } // namespace crypto

@@ -106,6 +106,25 @@ TEST_F(CryptoTest, Cipher_AES_128_ECB) {
     EXPECT_EQ(aes_128_ecb_encrypt(key, plain), cipher);
 }
 
+TEST_F(CryptoTest, Cipher_AES_256_ECB) {
+    String key = String::from_hex("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F");
+    String plain = String::from_hex("00112233445566778899AABBCCDDEEFF");
+    String cipher = String::from_hex("8EA2B7CA516745BFEAFC49904B496089");
+    EXPECT_EQ(aes_256_ecb_encrypt(key, plain), cipher);
+}
+
+TEST_F(CryptoTest, ChaCha20) {
+    String key = String::from_hex("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
+    String nonce = String::from_hex("000000000000004a00000000");
+    String text = StringRef::from_text("Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.").clone();
+    openssl::chacha20_inplace(key, 1, nonce, text);
+    EXPECT_EQ(text.sub_string(0, 16),
+              String::from_hex("6e2e359a2568f980 41ba0728dd0d6981"));
+    openssl::chacha20_inplace(key, 1, nonce, text);
+    EXPECT_EQ(text.sub_string(0, 6),
+              String::from_text("Ladies"));
+}
+
 TEST_F(CryptoTest, Cipher_AES_128_GCM) {
     String key = String::from_hex("feffe9928665731c6d6a8f9467308308");
     String plain = String::from_hex(

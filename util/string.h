@@ -7,6 +7,8 @@
 
 #include "util/utility.h"
 
+class String;
+
 class StringRef {
 
 public:
@@ -48,6 +50,8 @@ public:
 
     // for testing and debugging
     std::string to_hex() const;
+
+    String clone() const;
 
     friend std::ostream& operator<<(std::ostream& os, const StringRef& self);
 

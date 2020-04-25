@@ -47,6 +47,10 @@ String String::from_hex(const char* text) {
 
 }
 
+String StringRef::clone() const {
+    return String(data(), size());
+}
+
 std::string StringRef::to_hex() const {
     std::stringstream stream;
     stream << std::hex;

@@ -9,17 +9,19 @@
 
 namespace crypto {
 
-// These ciphersuites have a 16-byte authentication tag and produce an output
+// These ciphersuites all have a 16-byte authentication tag and produce an output
 // 16 bytes larger than their input.
+
+// conform to the IANA Consideration
 enum class AeadAlgorithm {
-    // conform to the IANA Consideration
+    // https://www.rfc-editor.org/rfc/inline-errata/rfc5116.html
     AEAD_AES_128_GCM = 1,
     AEAD_AES_256_GCM = 2,
     AEAD_AES_128_CCM = 3,
     AEAD_AES_256_CCM = 4,
+    // https://tools.ietf.org/html/rfc8103#page-6
+    AEAD_CHACHA20_POLY1305 = 18,
 };
-
-// https://www.rfc-editor.org/rfc/inline-errata/rfc5116.html
 
 /*
  * The authenticated encryption operation has four inputs, each of which is an
@@ -52,8 +54,6 @@ enum class AeadAlgorithm {
 
 // https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption
 
-String aes_128_ecb_encrypt(StringRef key, StringRef plaintext);
-
 String aes_128_gcm_encrypt(StringRef key, StringRef aad,
                            StringRef nonce,
                            StringRef plaintext);
@@ -66,8 +66,6 @@ String aes_128_gcm_encrypt(StringRef key, StringRef aad,
  * were crafted by a nonce-respecting adversary that does not know the secret
  * key.
  */
-
-String aes_128_ecb_decrypt(StringRef key, StringRef ciphertext);
 
 String aes_128_gcm_decrypt(StringRef key, StringRef aad,
                            StringRef nonce,

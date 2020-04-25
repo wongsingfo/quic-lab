@@ -1,3 +1,6 @@
+#ifndef CRYPTO_EXCEPTION_H
+#define CRYPTO_EXCEPTION_H
+
 #include <openssl/err.h>
 
 namespace crypto {
@@ -40,3 +43,5 @@ inline int openssl_call(const std::string &s_attempt, int return_value) {
 }
 
 } // namespace crypto
+
+#endif //CRYPTO_EXCEPTION_H

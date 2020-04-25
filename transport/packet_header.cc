@@ -4,6 +4,7 @@
 
 #include "transport/packet_header.h"
 #include "crypto/aead.h"
+#include "crypto/hp.h"
 
 static inline bool is_long_packet(uint8_t first_byte) {
     // The most significant bit (0x80) of byte 0 (the first byte) is set to 1 for long headers

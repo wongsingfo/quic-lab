@@ -2,6 +2,7 @@
 
 #include "crypto/hkdf.h"
 #include "crypto/aead.h"
+#include "crypto/hp.h"
 
 namespace crypto {
 

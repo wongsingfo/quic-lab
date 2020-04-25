@@ -4,8 +4,8 @@
 
 #include "crypto/aead.h"
 
-#include <openssl/ossl_typ.h>
-#include <openssl/evp.h>
+#include "openssl/evp.h"
+#include "openssl/aead.h"
 
 #include "exception.h"
 
@@ -13,80 +13,65 @@ namespace crypto {
 
 namespace openssl {
 
-void aes_128_gcm(StringRef key, StringRef aad,
-                   StringRef nonce,
-                   StringRef text,
-                   StringRef tag,
-                   StringRef output,
-                   bool is_encrypt) {
-    if (nonce.size() != 12) {
-        throw std::invalid_argument("the iv length must be 12 bytes");
+const EVP_AEAD *get_aead_algorithm(AeadAlgorithm aead) {
+    switch (aead) {
+        case AeadAlgorithm::AEAD_AES_128_GCM:
+            return EVP_aead_aes_128_gcm();
+        case AeadAlgorithm::AEAD_AES_256_GCM:
+            return EVP_aead_aes_256_gcm();
+        case AeadAlgorithm::AEAD_AES_128_CCM:
+            return EVP_aead_aes_128_ccm_bluetooth();
+        case AeadAlgorithm::AEAD_CHACHA20_POLY1305:
+            return EVP_aead_chacha20_poly1305();
     }
-    if (key.size() != 16) {
-        throw std::invalid_argument("key length should be of 16");
-    }
-    if (tag.size() != 16) {
-        throw std::invalid_argument("tag length should be of 16");
-    }
-    if (text.size() != output.size()) {
-        throw std::invalid_argument("the text lengths differ");
+}
+
+// https://commondatastorage.googleapis.com/chromium-boringssl-docs/aead.h.html
+void aead_inplace(const EVP_AEAD *aead, StringRef key,
+    StringRef text, StringRef nonce, StringRef ad,
+                  bool is_encrypt) {
+    EVP_AEAD_CTX *ctx =
+        EVP_AEAD_CTX_new(aead, key.data(), key.size(), QUIC_AEAD_TAG_LENGTH);
+    if (ctx == nullptr) {
+        throw openssl_error("new ctx failed", 0);
     }
 
-    int len;
-
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    openssl_call("Initialise the decryption operation",
-                 EVP_CipherInit_ex(ctx, EVP_aes_128_gcm(), nullptr, nullptr, nullptr, is_encrypt));
-    openssl_call("Initialise key and IV",
-                 EVP_CipherInit_ex(ctx, nullptr, nullptr, key.data(), nonce.data(), is_encrypt));
-    openssl_call("Provide any AAD data",
-                 EVP_CipherUpdate(ctx, nullptr, &len, aad.data(), aad.size()));
-
-    openssl_call("EVP_CipherUpdate",
-                 EVP_CipherUpdate(ctx, output.data(), &len,
-                                   text.data(), text.size()));
-    if (! is_encrypt) {
-        openssl_call("set the tag",
-                     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG,
-                                         tag.size(), tag.data()));
-    }
-
-    openssl_call("check the 16-byte tag",
-                 EVP_CipherFinal_ex(ctx, output.data() + len, &len));
+    size_t out_len;
 
     if (is_encrypt) {
-        openssl_call("set the tag",
-                     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG,
-                                         tag.size(), tag.data()));
+        openssl_call("EVP_AEAD_CTX_seal",
+                     EVP_AEAD_CTX_seal(ctx, text.data(), &out_len, text.size(),
+                                       nonce.data(), nonce.size(),
+                                       text.data(),
+                                       text.size() - QUIC_AEAD_TAG_LENGTH,
+                                       ad.data(), ad.size()));
+        dynamic_check(out_len == text.size());
+    } else {
+        openssl_call("EVP_AEAD_CTX_open",
+                     EVP_AEAD_CTX_open(ctx,
+                                       text.data(), &out_len,
+                                       text.size() - QUIC_AEAD_TAG_LENGTH,
+                                       nonce.data(), nonce.size(),
+                                       text.data(), text.size(),
+                                       ad.data(), ad.size()));
+        dynamic_check(out_len + QUIC_AEAD_TAG_LENGTH == text.size());
     }
 
-    EVP_CIPHER_CTX_free(ctx);
+    EVP_AEAD_CTX_free(ctx);
 }
 
 } // namespace openssl
 
-String aes_128_gcm_encrypt(StringRef key, StringRef aad,
-                           StringRef nonce,
-                           StringRef plaintext) {
-    String output(plaintext.size() + 16);
-    openssl::aes_128_gcm(key, aad, nonce,
-                         plaintext,
-                         output.sub_string(plaintext.size()),
-                         output.sub_string(0, plaintext.size()),
-                         true);
-    return output;
+void aead_encrypt_inplace(AeadAlgorithm algo, StringRef key,
+                          StringRef text, StringRef nonce, StringRef ad) {
+    openssl::aead_inplace(openssl::get_aead_algorithm(algo),
+                          key, text, nonce, ad, true);
 }
 
-String aes_128_gcm_decrypt(StringRef key, StringRef aad,
-                           StringRef nonce,
-                           StringRef ciphertext) {
-    String output(ciphertext.size() - 16);
-    openssl::aes_128_gcm(key, aad, nonce,
-                         ciphertext.sub_string(0, ciphertext.size() - 16),
-                         ciphertext.sub_string(ciphertext.size() - 16),
-                         output,
-                         false);
-    return output;
+void aead_decrypt_inplace(AeadAlgorithm algo, StringRef key,
+                          StringRef text, StringRef nonce, StringRef ad) {
+    openssl::aead_inplace(openssl::get_aead_algorithm(algo),
+                          key, text, nonce, ad, false);
 }
 
 } // namespace crypto

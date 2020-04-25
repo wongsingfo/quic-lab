@@ -9,19 +9,19 @@
 
 namespace crypto {
 
-// These ciphersuites all have a 16-byte authentication tag and produce an output
-// 16 bytes larger than their input.
-
 // conform to the IANA Consideration
 enum class AeadAlgorithm {
     // https://www.rfc-editor.org/rfc/inline-errata/rfc5116.html
     AEAD_AES_128_GCM = 1,
     AEAD_AES_256_GCM = 2,
     AEAD_AES_128_CCM = 3,
-    AEAD_AES_256_CCM = 4,
     // https://tools.ietf.org/html/rfc8103#page-6
     AEAD_CHACHA20_POLY1305 = 18,
 };
+
+// The ciphersuites used by QUIC all have a 16-byte authentication tag and 
+// produce an output 16 bytes larger than their input.
+constexpr size_t QUIC_AEAD_TAG_LENGTH = 16;
 
 /*
  * The authenticated encryption operation has four inputs, each of which is an
@@ -52,11 +52,8 @@ enum class AeadAlgorithm {
  *    Length: [0, A_MAX];
  */
 
-// https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption
-
-String aes_128_gcm_encrypt(StringRef key, StringRef aad,
-                           StringRef nonce,
-                           StringRef plaintext);
+void aead_encrypt_inplace(AeadAlgorithm algo, StringRef key,
+                          StringRef text, StringRef nonce, StringRef ad);
 
 /*
  * The authenticated decryption operation has four inputs: K, N, A, and C,
@@ -67,15 +64,14 @@ String aes_128_gcm_encrypt(StringRef key, StringRef aad,
  * key.
  */
 
-String aes_128_gcm_decrypt(StringRef key, StringRef aad,
-                           StringRef nonce,
-                           StringRef ciphertext);
+void aead_decrypt_inplace(AeadAlgorithm algo, StringRef key,
+                          StringRef text, StringRef nonce, StringRef ad);
 
 /* Packet Protection
  * https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-aead-usage
  *
  * secret = current encryption level secret
- * K  = HKDF_Expand(secret, "quic key", _, 16)
+ * K  = HKDF_Expand(secret, "quic key", _, 16/32)
  * IV = HKDF_Expand(secret, "quic iv", _, 12)
  * N  = IV xor packet_number (left-padded with zero)
  * A  = starting from the flags bytes up to and including the unprotected

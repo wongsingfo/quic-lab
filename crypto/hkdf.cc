@@ -3,13 +3,15 @@
 /* OpenSSL version: 1.1.0 */
 #include <openssl/hkdf.h>
 #include <openssl/mem.h>
-#include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/err.h>
 
 #include "util/string_writer.h"
 
 namespace crypto {
+
+namespace openssl {
+
 
 // adapted from https://github.com/openssl/openssl/blob/a76ce2862bc6ae2cf8a749c8747d371041fc42d1/providers/implementations/kdfs/hkdf.c
 
@@ -37,7 +39,6 @@ namespace crypto {
  *
  *   PRK = HMAC-Hash(salt, IKM)
  */
-
 
 static void HKDF_Extract(const EVP_MD *evp_md,
                         const unsigned char *salt, size_t salt_len,
@@ -214,19 +215,29 @@ static void HKDF(const EVP_MD *evp_md,
     OPENSSL_cleanse(prk, sizeof(prk));
 }
 
-String hkdf(const StringRef salt,
-            const StringRef secret,
-            const StringRef info,
+} // namespace openssl
+
+const EVP_MD* get_hash_method(HkdfHash hash) {
+    switch (hash) {
+        case HkdfHash::SHA_256:
+            return EVP_sha256();
+        case HkdfHash::SHA_384:
+            return EVP_sha384();
+    }
+}
+
+
+String hkdf(HkdfHash hash, StringRef salt, StringRef secret, StringRef info,
             size_t length) {
     // https://www.openssl.org/docs/man1.1.0/man3/EVP_PKEY_CTX_set_hkdf_md.html
 
     String output(length);
 
-    HKDF(EVP_sha256(),
-         salt.data(), salt.size(),
-         secret.data(), secret.size(),
-         info.data(), info.size(),
-         output.data(), output.size());
+    openssl::HKDF(get_hash_method(hash),
+                  salt.data(), salt.size(),
+                  secret.data(), secret.size(),
+                  info.data(), info.size(),
+                  output.data(), output.size());
 
 
     return output;
@@ -246,19 +257,31 @@ String hkdf_label(const StringRef salt,
     info.write(prepend);
     info.write(label);
     info.write_u8(0);
-    return hkdf(salt, secret, info, length);
+    return hkdf(HkdfHash::SHA_256, salt, secret, info, length);
 }
 
-String hkdf_expand(const StringRef prk, const StringRef info, size_t length) {
-    String result(length);
-    HKDF_Expand(EVP_sha256(),
-        prk.data(), prk.size(),
-        info.data(), info.size(),
-        result.data(), result.size());
+String hkdf_extract(HkdfHash hash, StringRef salt, StringRef ikm) {
+    const env_md_st *method = get_hash_method(hash);
+    String result(EVP_MD_size(method));
+    openssl::HKDF_Extract(method,
+                          salt.data(), salt.size(),
+                          ikm.data(), ikm.size(),
+                          result.data(), result.size());
     return result;
 }
 
-String hkdf_expand_label(const StringRef prk,
+String hkdf_expand(HkdfHash hash, const StringRef prk,
+                   const StringRef info, size_t length) {
+    String result(length);
+    openssl::HKDF_Expand(get_hash_method(hash),
+                         prk.data(), prk.size(),
+                         info.data(), info.size(),
+                         result.data(), result.size());
+    return result;
+}
+
+String hkdf_expand_label(HkdfHash hash,
+                         const StringRef prk,
                          const StringRef label,
                          const StringRef context,
                          size_t length) {
@@ -272,7 +295,7 @@ String hkdf_expand_label(const StringRef prk,
     info.write(label);
     info.write_u8(0);
 
-    return hkdf_expand(prk, info, length);
+    return hkdf_expand(hash, prk, info, length);
 }
 
 

@@ -36,7 +36,7 @@ protected:
 
 TEST_F(CryptoTest, Test01) {
     String output =
-        hkdf(String::from_hex("0x000102030405060708090a0b0c"),
+        hkdf(HkdfHash::SHA_256, String::from_hex("0x000102030405060708090a0b0c"),
              String::from_hex("0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"),
              String::from_hex("0xf0f1f2f3f4f5f6f7f8f9"),
              42);
@@ -73,7 +73,8 @@ TEST_F(CryptoTest, ServerInitialHP) {
               "90ab17d8149179bcadf222f29ff2ddd5");
 
     String output =
-        hkdf_expand_label(server_initial_secret,
+        hkdf_expand_label(HkdfHash::SHA_256,
+                          server_initial_secret,
                           String::from_text("quic hp"),
                           StringRef::empty_string(),
                           16);
@@ -86,10 +87,10 @@ TEST_F(CryptoTest, ServerInitialHP) {
 
 TEST_F(CryptoTest, ClientHPSecret) {
     String output =
-        hkdf_expand_label( client_initial_secret,
-                           String::from_text("quic hp"),
-                           String::empty_string(),
-                           16);
+        hkdf_expand_label(HkdfHash::SHA_256, client_initial_secret,
+                          String::from_text("quic hp"),
+                          String::empty_string(),
+                          16);
 
     EXPECT_EQ(output.size(), 16);
 

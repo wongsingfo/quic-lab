@@ -20,7 +20,8 @@ AeadAlgorithm Cipher::get_aead_algorithm(CipherSuite suite) {
 
 String Cipher::derive_key(StringRef secret, const char *label,
                           CipherSuite suite) {
-    return crypto::hkdf_expand_label(secret,
+    return crypto::hkdf_expand_label(HkdfHash::SHA_256,
+                                     secret,
                                      StringRef::from_text(label),
                                      StringRef::empty_string(),
                                      crypto::get_key_length(
@@ -40,9 +41,11 @@ Cipher Cipher::from_initial_secret(StringRef ikm, bool is_server) {
         String::from_hex("0xc3eef712c72ebb5a11a7d2432bb46365bef9f502");
 
     String initial_secret =
-        crypto::hkdf_extract(initial_salt, ikm);
+        crypto::hkdf_extract(HkdfHash::SHA_256, initial_salt, ikm);
     String secret =
-        crypto::hkdf_expand_label(initial_secret,
+        crypto::hkdf_expand_label(
+            HkdfHash::SHA_256,
+            initial_secret,
             StringRef::from_text(is_server ? "server in" : "client in"),
                                   StringRef::empty_string(),
                                   16);

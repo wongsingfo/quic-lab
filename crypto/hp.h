@@ -8,8 +8,6 @@
 #include "util/string.h"
 #include "crypto/exception.h"
 
-namespace crypto {
-
 enum class HpAlgorithm {
 // https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-aes-based-header-protection
     AES_ECB_128,
@@ -18,6 +16,8 @@ enum class HpAlgorithm {
 // https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-chacha20-based-header-prote
     ChaCha_20,
 };
+
+namespace crypto {
 
 String get_hp_mask(HpAlgorithm algo, StringRef hp_key, StringRef sample);
 

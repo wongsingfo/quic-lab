@@ -8,6 +8,12 @@
 #include "util/string.h"
 #include "crypto/exception.h"
 
+enum class HkdfHash {
+    // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+    SHA_256,
+    SHA_384,
+};
+
 namespace crypto {
 
 /* https://www.rfc-editor.org/rfc/rfc5869
@@ -29,16 +35,12 @@ namespace crypto {
  *     HashLen: the length of the hash function output in octets
  */
 
+String hkdf_extract(HkdfHash hash, StringRef salt, StringRef ikm);
 
-String hkdf_extract(StringRef salt,
-                    StringRef ikm);
-
-String hkdf_expand(StringRef prk, StringRef info, size_t length);
+String hkdf_expand(HkdfHash hash, StringRef prk, StringRef info, size_t length);
 
 // a wrapper function hkdf_extract() and hkdf_expand()
-String hkdf(StringRef salt,
-            StringRef secret,
-            StringRef info,
+String hkdf(HkdfHash hash, StringRef salt, StringRef secret, StringRef info,
             size_t length);
 
 /*
@@ -60,7 +62,8 @@ String hkdf(StringRef salt,
  * In QUIC, the `context` is always empty.
  */
 
-String hkdf_expand_label(StringRef prk,
+String hkdf_expand_label(HkdfHash hash,
+                         StringRef prk,
                          StringRef label,
                          StringRef context,
                          size_t length);

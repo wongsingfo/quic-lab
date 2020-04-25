@@ -7,6 +7,7 @@
 
 #include "util/string.h"
 #include "crypto/aead.h"
+#include "hkdf.h"
 
 // TLS 1.3 cipher suites
 // https://www.rfc-editor.org/rfc/rfc8446.html#appendix-B.4
@@ -28,11 +29,18 @@ public:
 
     Cipher (Cipher&& other) = default;
 
+    // |ikm| is the |dst_connection_id|
     static Cipher from_initial_secret(StringRef ikm, bool is_server);
+
+    StringRef hp() const {
+        return hp_;
+    }
 
 private:
 
     static AeadAlgorithm get_aead_algorithm(CipherSuite suite);
+
+    static HkdfHash get_hkdf_hash(CipherSuite suite);
 
     static String derive_key(StringRef secret, const char *label, CipherSuite suite);
 

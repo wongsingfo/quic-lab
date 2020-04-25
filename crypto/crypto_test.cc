@@ -3,6 +3,7 @@
 #include "crypto/hkdf.h"
 #include "crypto/aead.h"
 #include "crypto/hp.h"
+#include "crypto/cipher.h"
 
 namespace crypto {
 
@@ -139,6 +140,11 @@ TEST_F(CryptoTest, Cipher_AES_128_GCM) {
     aead_encrypt_inplace(AeadAlgorithm::AEAD_AES_128_GCM,
                          key, plain, nonce, AAD);
     EXPECT_EQ(plain, cipher);
+}
+
+TEST_F(CryptoTest, CipherSuiteInitial) {
+    Cipher cipher = Cipher::from_initial_secret(DCID, false);
+    EXPECT_EQ(cipher.hp(), client_hp);
 }
 
 } // namespace crypto

@@ -260,9 +260,18 @@ String hkdf_label(const StringRef salt,
     return hkdf(HkdfHash::SHA_256, salt, secret, info, length);
 }
 
+size_t get_hash_length(HkdfHash hash) {
+    switch (hash) {
+        case HkdfHash::SHA_256:
+            return 32;
+        case HkdfHash::SHA_384:
+            return 48;
+    }
+}
+
 String hkdf_extract(HkdfHash hash, StringRef salt, StringRef ikm) {
     const env_md_st *method = get_hash_method(hash);
-    String result(EVP_MD_size(method));
+    String result(get_hash_length(hash));
     openssl::HKDF_Extract(method,
                           salt.data(), salt.size(),
                           ikm.data(), ikm.size(),

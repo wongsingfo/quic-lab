@@ -18,9 +18,20 @@ AeadAlgorithm Cipher::get_aead_algorithm(CipherSuite suite) {
     }
 }
 
+HkdfHash Cipher::get_hkdf_hash(CipherSuite suite) {
+    switch (suite) {
+        case CipherSuite::TLS_AES_128_GCM_SHA256:
+        case CipherSuite::TLS_AES_128_CCM_SHA256:
+        case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
+            return HkdfHash::SHA_256;
+        case CipherSuite::TLS_AES_256_GCM_SHA384:
+            return HkdfHash::SHA_384;
+    }
+}
+
 String Cipher::derive_key(StringRef secret, const char *label,
                           CipherSuite suite) {
-    return crypto::hkdf_expand_label(HkdfHash::SHA_256,
+    return crypto::hkdf_expand_label(get_hkdf_hash(suite),
                                      secret,
                                      StringRef::from_text(label),
                                      StringRef::empty_string(),
@@ -47,8 +58,8 @@ Cipher Cipher::from_initial_secret(StringRef ikm, bool is_server) {
             HkdfHash::SHA_256,
             initial_secret,
             StringRef::from_text(is_server ? "server in" : "client in"),
-                                  StringRef::empty_string(),
-                                  16);
+            StringRef::empty_string(),
+            crypto::get_hash_length(HkdfHash::SHA_256));
 
     return Cipher(CipherSuite::TLS_AES_128_GCM_SHA256, secret);
 }

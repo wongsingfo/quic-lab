@@ -16,6 +16,8 @@ enum class HkdfHash {
 
 namespace crypto {
 
+size_t get_hash_length(HkdfHash hash);
+
 /* https://www.rfc-editor.org/rfc/rfc5869
  *  (with test cases)
  *

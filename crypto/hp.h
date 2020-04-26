@@ -19,6 +19,8 @@ enum class HpAlgorithm {
 
 namespace crypto {
 
+size_t get_hp_key_length(HpAlgorithm algo);
+
 String get_hp_mask(HpAlgorithm algo, StringRef hp_key, StringRef sample);
 
 // ADVANCED ENCRYPTION STANDARD:

@@ -29,22 +29,37 @@ HkdfHash Cipher::get_hkdf_hash(CipherSuite suite) {
     }
 }
 
+HpAlgorithm Cipher::get_hp_algorithm(CipherSuite suite) {
+    switch (suite) {
+        case CipherSuite::TLS_AES_128_GCM_SHA256:
+        case CipherSuite::TLS_AES_128_CCM_SHA256:
+            return HpAlgorithm::AES_ECB_128;
+        case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
+            return HpAlgorithm::AES_ECB_128;
+        case CipherSuite::TLS_AES_256_GCM_SHA384:
+            return HpAlgorithm::ChaCha_20;
+    }
+}
+
+
 String Cipher::derive_key(StringRef secret, const char *label,
-                          CipherSuite suite) {
+                          CipherSuite suite, size_t length) {
     return crypto::hkdf_expand_label(get_hkdf_hash(suite),
                                      secret,
                                      StringRef::from_text(label),
                                      StringRef::empty_string(),
-                                     crypto::get_key_length(
-                                         get_aead_algorithm(suite)));
+                                     length);
 }
 
 // https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-packet-protection-keys
 Cipher::Cipher(CipherSuite suite, StringRef secret)
     : suite_(suite),
-      key_(derive_key(secret, "quic key", suite)),
-      iv_(derive_key(secret, "quic iv", suite)),
-      hp_(derive_key(secret, "quic hp", suite)) {
+      key_(derive_key(secret, "quic key", suite, 
+        crypto::get_key_length(get_aead_algorithm(suite)))),
+      iv_(derive_key(secret, "quic iv", suite,
+        crypto::get_iv_length(get_aead_algorithm(suite)))),
+      hp_(derive_key(secret, "quic hp", suite,
+        crypto::get_hp_key_length(get_hp_algorithm(suite)))) {
 }
 
 Cipher Cipher::from_initial_secret(StringRef ikm, bool is_server) {

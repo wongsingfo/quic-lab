@@ -7,7 +7,8 @@
 
 #include "util/string.h"
 #include "crypto/aead.h"
-#include "hkdf.h"
+#include "crypto/hp.h"
+#include "crypto/hkdf.h"
 
 // TLS 1.3 cipher suites
 // https://www.rfc-editor.org/rfc/rfc8446.html#appendix-B.4
@@ -42,7 +43,9 @@ private:
 
     static HkdfHash get_hkdf_hash(CipherSuite suite);
 
-    static String derive_key(StringRef secret, const char *label, CipherSuite suite);
+    static HpAlgorithm get_hp_algorithm(CipherSuite suite);
+
+    static String derive_key(StringRef secret, const char *label, CipherSuite suite, size_t length);
 
     CipherSuite suite_;
     String key_;

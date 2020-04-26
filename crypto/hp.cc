@@ -46,7 +46,7 @@ static String aes_ecb(const EVP_CIPHER *(*method)(),
 void chacha20_inplace(StringRef key, uint32_t counter,
                 StringRef nonce, StringRef text) {
     if (key.size() != 32) {
-        throw std::invalid_argument("key length should be of 16");
+        throw std::invalid_argument("key length should be of 32");
     }
     if (nonce.size() != 12) {
         throw std::invalid_argument("nonce length should be of 12");
@@ -89,6 +89,17 @@ static String chacha_20_encrypt_decrypt(StringRef hp_key, StringRef sample) {
     counter |= sample[3] << 24;
     openssl::chacha20_inplace(hp_key, counter, sample.sub_string(4, 15), result);
     return result;
+}
+
+size_t get_hp_key_length(HpAlgorithm algo) {
+    switch (algo) {
+        case HpAlgorithm::AES_ECB_128:
+            return 16;
+        case HpAlgorithm::AES_ECB_256:
+            return 32;
+        case HpAlgorithm::ChaCha_20:
+            return 32;
+    }
 }
 
 String get_hp_mask(HpAlgorithm algo, StringRef hp_key, StringRef sample) {

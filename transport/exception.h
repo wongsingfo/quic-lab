@@ -17,6 +17,24 @@ public:
 
 };
 
+// https://quicwg.org/base-drafts/draft-ietf-quic-transport.html#name-quic-transport-error-codes-
+enum class QuicError {
+    INTERNAL_ERROR = 0x1,
+    FRAME_ENCODING_ERROR = 0x7,
+};
+
+class quic_error : public std::exception {
+
+public: 
+    explicit quic_error(QuicError error) 
+        : std::exception(), error_(error) {}
+
+private:
+
+    QuicError error_;
+
+};
+
 class error_protocol_violation : public std::runtime_error {
 
 public:

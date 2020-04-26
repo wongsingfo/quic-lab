@@ -11,6 +11,20 @@
 
 #include "transport/exception.h"
 
+class StreamId {
+
+public: 
+    StreamId() = default;
+    ~StreamId() = default;
+
+    StreamId(uint64_t id) 
+        : id_(id) {}
+
+private:
+    uint64_t id_;
+
+};
+
 /*
  * Connection ID (CID) encoding:
  *    1. a byte indicating the length of the CID. In current QUIC version,
@@ -57,7 +71,5 @@ public:
 };
 
 using Version = uint32_t;
-
-using Offset = uint64_t;
 
 #endif //TRANSPORT_TYPES_H

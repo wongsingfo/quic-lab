@@ -7,6 +7,8 @@
 #ifndef CRYPTO_QUIC_TLS_H
 #define CRYPTO_QUIC_TLS_H
 
+#include <functional>
+
 #include "openssl/base.h"
 
 #include "crypto/exception.h"

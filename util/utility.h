@@ -6,6 +6,9 @@
 #include <iostream>
 #include <cassert>
 
+// https://github.com/amrayn/easyloggingpp
+#include "util/easylogging++.h"
+
 namespace std {
 
 template<typename T, typename... Args>
@@ -21,12 +24,6 @@ inline void dynamic_check(bool flag) {
     } else {
         // ok
     }
-}
-
-using log_stream = std::ostream;
-
-inline log_stream &log_debug() {
-    return std::cerr;
 }
 
 #ifndef htonll

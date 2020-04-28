@@ -10,38 +10,41 @@ Frames Frame::from_reader(StringReader &reader) {
 
     while (!reader.empty()) {
         Frame frame;
-        uint64_t type_id = reader.read_with_variant_length();
-        if (type_id >= kNumOfFrameTypes) {
-            throw quic_error(QuicError::FRAME_ENCODING_ERROR);
-        }
-        constexpr uint64_t ack_ecn = 3;
+        FrameType type_id = reader.read_with_variant_length();
 
-        FrameType type = (type_id == ack_ecn ? 
-            FrameType::ACK : (FrameType) type_id);
-        frame.type = type;
+        frame.type = type_id;
 
-        switch (type) {
-            case FrameType::PADDING:
+        switch (type_id) {
+            case FRAME_TYPE_PADDING:
                 frame.padding = PaddingFrame::from_reader(reader);
                 break;
-            case FrameType::PING:
+            case FRAME_TYPE_PING:
                 frame.ping = PingFrame::from_reader(reader);
                 break;
-            case FrameType::ACK:
-                frame.ack = AckFrame::from_reader(reader, ack_ecn == type_id);
+            case FRAME_TYPE_ACK:
+                frame.ack = AckFrame::from_reader(reader, false);
                 break;
-            case FrameType::RESET:
+            case FRAME_TYPE_ACK_ECN:
+                frame.type = FRAME_TYPE_ACK;
+                frame.ack = AckFrame::from_reader(reader, true);
+                break;
+            case FRAME_TYPE_RST_STREAM:
                 frame.reset = ResetFrame::from_reader(reader);
                 break;
-            case FrameType::STOP_SENDING:
+            case FRAME_TYPE_STOP_SENDING:
                 frame.stop_sending = StopSendingFrame::from_reader(reader);
                 break;
-            case FrameType::CRYPTO:
+            case FRAME_TYPE_CRYPTO:
                 frame.crypto = CryptoFrame::from_reader(reader);
                 break;
-            case FrameType::NEW_TOKEN:
-                frame.token = NewTokenFrame::from_reader(reader);
+            case FRAME_TYPE_NEW_TOKEN:
+                frame.new_token = NewTokenFrame::from_reader(reader);
                 break;
+            case FRAME_TYPE_STREAM ... FRAME_TYPE_STREAM + 7:
+                frame.stream = StreamFrame::from_reader(reader, type_id);
+                break;
+            default:
+                throw quic_error(QuicError::FRAME_ENCODING_ERROR);
         }
 
         result.push_back(frame);
@@ -52,21 +55,12 @@ Frames Frame::from_reader(StringReader &reader) {
 
 void Frame::delete_frame() {
     switch (type) {
-        case FrameType::PADDING:
-        case FrameType::PING:
-            return;
-        
-        case FrameType::ACK:
+        case FRAME_TYPE_ACK:
             delete ack;
+        case FRAME_TYPE_NEW_TOKEN:
+            delete new_token;
+        default:
             return;
-
-        case FrameType::CRYPTO:
-        case FrameType::RESET:
-        case FrameType::STOP_SENDING:
-            return;
-
-        case FrameType::NEW_TOKEN:
-            delete token;
     }
 }
 
@@ -164,5 +158,26 @@ NewTokenFrame *NewTokenFrame::from_reader(StringReader &reader) {
     };
 }
 
-
+StreamFrame StreamFrame::from_reader(StringReader &reader, FrameType type_id) {
+    StreamId stream_id = reader.read_with_variant_length();
+    uint64_t offset = 0;
+    if (type_id & STREAM_FRAME_BIT_OFF) {
+        offset = reader.read_with_variant_length();
+    }
+    uint64_t length;
+    if (type_id & STREAM_FRAME_BIT_LEN) {
+        length = reader.read_with_variant_length();
+    } else {
+        // the rest of the payload
+        length = reader.size() - reader.position();
+    }
+    StringRef data = {reader.peek_data(), length};
+    reader.skip(length);
+    return StreamFrame {
+        .stream_id = stream_id,
+        .offset = offset,
+        .data = data,
+        .fin = static_cast<bool>(type_id & STREAM_FRAME_BIT_FIN),
+    };
+}
 

@@ -39,6 +39,8 @@ public:
 
 private:
 
+    // return the corresponding AEAD algorithms
+    // https://www.rfc-editor.org/rfc/rfc8446.html#appendix-B.4
     static AeadAlgorithm get_aead_algorithm(CipherSuite suite);
 
     static HkdfHash get_hkdf_hash(CipherSuite suite);

@@ -29,4 +29,19 @@ inline log_stream &log_debug() {
     return std::cerr;
 }
 
+#ifndef htonll
+
+#if __BIG_ENDIAN__
+# define htonll(x) (x)
+# define ntohll(x) (x)
+#else
+# define htonll(x) \
+      (((uint64_t)htonl((x) & 0xFFFFFFFF) << 32u) | htonl((x) >> 32u))
+# define ntohll(x) \
+      (((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32u) | ntohl((x) >> 32u))
+#endif
+
+#endif
+
+
 #endif

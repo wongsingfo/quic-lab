@@ -4,6 +4,8 @@
 
 #include "util/string_reader.h"
 
+#include <arpa/inet.h>
+
 void StringReader::read(const String::dtype *data, size_t length) {
     if (position_ + length > size()) {
         throw std::overflow_error("StringReader::read");

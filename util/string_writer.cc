@@ -4,6 +4,8 @@
 
 #include "string_writer.h"
 
+#include <arpa/inet.h>
+
 void StringWriter::write(const String::dtype *data, size_t length) {
     if (position_ + length > size()) {
         throw std::overflow_error("StringWriter::write");

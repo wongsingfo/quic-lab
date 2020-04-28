@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 #include <iostream>
+#include <cassert>
 
 namespace std {
 

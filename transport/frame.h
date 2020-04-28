@@ -10,14 +10,17 @@
 #include "util/optional.h"
 #include "transport/types.h"
 
+constexpr int kNumOfFrameTypes = 21;
+
 enum class FrameType {
     PADDING = 0,
     PING = 1,
     ACK = 2,
-    ACK_ECN = 3,
+    // 3 for ACK with ECN
     RESET = 4,
     STOP_SENDING = 5,
     CRYPTO = 6,
+    NEW_TOKEN = 7,
 };
 
 using std::experimental::optional;
@@ -81,6 +84,12 @@ struct CryptoFrame {
     static CryptoFrame from_reader(StringReader &reader);
 };
 
+struct NewTokenFrame {
+    Token token;
+
+    static NewTokenFrame *from_reader(StringReader &reader);
+};
+
 // Version Negotiation, Stateless Reset, and Retry packets do not
 // contain frames.
 
@@ -95,8 +104,9 @@ struct Frame {
         PingFrame ping;
         AckFrame *ack;
         ResetFrame reset;
-        CryptoFrame crypto;
         StopSendingFrame stop_sending;
+        CryptoFrame crypto;
+        NewTokenFrame *token;
     };
 
     void delete_frame();

@@ -10,8 +10,14 @@ Frames Frame::from_reader(StringReader &reader) {
 
     while (!reader.empty()) {
         Frame frame;
-        // TODO: check |type|
-        FrameType type = (FrameType) reader.read_with_variant_length();
+        uint64_t type_id = reader.read_with_variant_length();
+        if (type_id >= kNumOfFrameTypes) {
+            throw quic_error(QuicError::FRAME_ENCODING_ERROR);
+        }
+        constexpr uint64_t ack_ecn = 3;
+
+        FrameType type = (type_id == ack_ecn ? 
+            FrameType::ACK : (FrameType) type_id);
         frame.type = type;
 
         switch (type) {
@@ -22,11 +28,7 @@ Frames Frame::from_reader(StringReader &reader) {
                 frame.ping = PingFrame::from_reader(reader);
                 break;
             case FrameType::ACK:
-                frame.ack = AckFrame::from_reader(reader, false);
-                break;
-            case FrameType::ACK_ECN:
-                frame.type = FrameType::ACK;
-                frame.ack = AckFrame::from_reader(reader, true);
+                frame.ack = AckFrame::from_reader(reader, ack_ecn == type_id);
                 break;
             case FrameType::RESET:
                 frame.reset = ResetFrame::from_reader(reader);
@@ -36,6 +38,9 @@ Frames Frame::from_reader(StringReader &reader) {
                 break;
             case FrameType::CRYPTO:
                 frame.crypto = CryptoFrame::from_reader(reader);
+                break;
+            case FrameType::NEW_TOKEN:
+                frame.token = NewTokenFrame::from_reader(reader);
                 break;
         }
 
@@ -48,13 +53,20 @@ Frames Frame::from_reader(StringReader &reader) {
 void Frame::delete_frame() {
     switch (type) {
         case FrameType::PADDING:
-        case FrameType::CRYPTO:
         case FrameType::PING:
             return;
         
         case FrameType::ACK:
             delete ack;
             return;
+
+        case FrameType::CRYPTO:
+        case FrameType::RESET:
+        case FrameType::STOP_SENDING:
+            return;
+
+        case FrameType::NEW_TOKEN:
+            delete token;
     }
 }
 
@@ -140,6 +152,15 @@ StopSendingFrame StopSendingFrame::from_reader(StringReader &reader) {
     return StopSendingFrame {
         .stream_id = StreamId(stream_id),
         .error = (QuicError) error,
+    };
+}
+
+NewTokenFrame *NewTokenFrame::from_reader(StringReader &reader) {
+    uint64_t length = reader.read_with_variant_length();
+    Token token = Token(reader.peek_data(), length);
+    reader.skip(length);
+    return new NewTokenFrame {
+        .token = std::move(token),
     };
 }
 

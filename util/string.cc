@@ -64,7 +64,7 @@ std::string StringRef::to_hex() const {
 }
 
 StringRef StringRef::from_text(const char *text) {
-    return String(text, strlen(text));
+    return StringRef((dtype*) text, strlen(text));
 }
 
 bool StringRef::operator == (const StringRef &other) const noexcept {

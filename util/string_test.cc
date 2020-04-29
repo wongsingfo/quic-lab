@@ -60,7 +60,8 @@ protected:
 };
 
 TEST_F(StringReaderTest, Test01) {
-    StringReader reader(String::from_hex("c2 19 7c 5e ff 14 e8 8c"));
+    String input = String::from_hex("c2 19 7c 5e ff 14 e8 8c");
+    StringReader reader(input);
     EXPECT_EQ(
         reader.read_with_variant_length(),
         151288809941952652
@@ -68,7 +69,8 @@ TEST_F(StringReaderTest, Test01) {
 }
 
 TEST_F(StringReaderTest, Test02) {
-    StringReader reader(String::from_hex("25"));
+    String input = String::from_hex("25");
+    StringReader reader(input);
     EXPECT_EQ(
         reader.read_with_variant_length(),
         37
@@ -76,7 +78,8 @@ TEST_F(StringReaderTest, Test02) {
 }
 
 TEST_F(StringReaderTest, Test03) {
-    StringReader reader(String::from_hex("40 25"));
+    String input = String::from_hex("40 25");
+    StringReader reader(input);
     EXPECT_EQ(
         reader.read_with_variant_length(),
         37
@@ -84,7 +87,8 @@ TEST_F(StringReaderTest, Test03) {
 }
 
 TEST_F(StringReaderTest, Test04) {
-    StringReader reader(String::from_hex("25"));
+    String input = String::from_hex("25");
+    StringReader reader(input);
     EXPECT_EQ(
         reader.read_with_variant_length(),
         37

@@ -249,14 +249,15 @@ String hkdf_label(const StringRef salt,
                   size_t length) {
 
     constexpr const char* prepend = "tls13 ";
-    StringWriter info(sizeof(uint16_t) +
-                      1 + strlen(prepend) + label.size() +
-                      1); //
-    info.write_u16(length);
-    info.write_u8(strlen(prepend) + label.size());
-    info.write(prepend);
-    info.write(label);
-    info.write_u8(0);
+    String info(sizeof(uint16_t) +
+                1 + strlen(prepend) + label.size() +
+                1);
+    StringWriter writer(info);
+    writer.write_u16(length);
+    writer.write_u8(strlen(prepend) + label.size());
+    writer.write(prepend);
+    writer.write(label);
+    writer.write_u8(0);
     return hkdf(HkdfHash::SHA_256, salt, secret, info, length);
 }
 
@@ -295,14 +296,15 @@ String hkdf_expand_label(HkdfHash hash,
                          const StringRef context,
                          size_t length) {
     constexpr const char* prepend = "tls13 ";
-    StringWriter info(sizeof(uint16_t) +
-                      1 + strlen(prepend) + label.size() +
-                      1); //
-    info.write_u16(length);
-    info.write_u8(strlen(prepend) + label.size());
-    info.write(prepend);
-    info.write(label);
-    info.write_u8(0);
+    String info(sizeof(uint16_t) +
+                1 + strlen(prepend) + label.size() +
+                1); //
+    StringWriter writer(info);
+    writer.write_u16(length);
+    writer.write_u8(strlen(prepend) + label.size());
+    writer.write(prepend);
+    writer.write(label);
+    writer.write_u8(0);
 
     return hkdf_expand(hash, prk, info, length);
 }

@@ -7,9 +7,7 @@
 
 #include "util/string.h"
 
-// The writer owns the |data_| so it is derived from String
-// rather than StringRef
-class StringWriter : public String {
+class StringWriter : public StringRef {
 
 private:
 
@@ -17,8 +15,13 @@ private:
 
 public:
 
-    explicit StringWriter(size_t size)
-        : String(size),
+    StringWriter(dtype* data, size_t size)
+        : StringRef(data, size),
+          position_(0)
+    {}
+
+    StringWriter(StringRef data)
+        : StringRef(data),
           position_(0)
     {}
 
@@ -30,6 +33,14 @@ public:
 
     void write_u8(uint8_t value);
     void write_u16(uint16_t value);
+
+    inline size_t remaining() const {
+        return size() - position_;
+    }
+
+    inline size_t position() const {
+        return position_;
+    }
 
     // disallow copy and assignment
     StringWriter (const StringWriter&) = delete;

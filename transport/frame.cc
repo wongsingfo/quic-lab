@@ -169,7 +169,7 @@ StreamFrame StreamFrame::from_reader(StringReader &reader, FrameType type_id) {
         length = reader.read_with_variant_length();
     } else {
         // the rest of the payload
-        length = reader.size() - reader.position();
+        length = reader.remaining();
     }
     StringRef data = {reader.peek_data(), length};
     reader.skip(length);

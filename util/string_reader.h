@@ -44,6 +44,10 @@ public:
 
     void skip(size_t length);
 
+    inline size_t remaining() const {
+        return size() - position_;
+    }
+
     inline dtype* peek_data() const {
         return this->data() + position_;
     }

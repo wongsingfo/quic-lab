@@ -60,7 +60,8 @@ add_subdirectory(transport)
 set(test_source
         crypto/crypto_test.cc
         util/string_test.cc
-        transport/packet_test.cc)
+        transport/packet_test.cc
+        transport/stream_test.cc)
 
 
 # set up gtest

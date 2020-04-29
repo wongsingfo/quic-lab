@@ -84,6 +84,8 @@ public:
     // For example, 0x12ff, 12ff
     static String from_hex(const char* text);
 
+    static String random(size_t size);
+
     inline void reset() {
         data_ = nullptr;
         size_ = 0;

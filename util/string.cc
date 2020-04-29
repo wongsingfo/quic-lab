@@ -47,6 +47,14 @@ String String::from_hex(const char* text) {
 
 }
 
+String String::random(size_t size) {
+    String result(size);
+    for (size_t i = 0; i < size; i++) {
+        result[i] = (dtype) i;
+    }
+    return result;
+}
+
 String StringRef::clone() const {
     return String(data(), size());
 }

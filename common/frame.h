@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "util/optional.h"
-#include "transport/types.h"
+#include "common/types.h"
 
 constexpr int kNumOfFrameTypes = 21;
 
@@ -145,7 +145,7 @@ struct MaxDataFrame {
 };
 
 struct MaxStreamFrame {
-    bool is_bidirectional;
+    StreamDirection direction;
     bool is_block;
     uint64_t max_stream;
 

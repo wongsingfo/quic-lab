@@ -53,6 +53,7 @@ include_directories(boringssl/include)
 
 # quic lab
 include_directories(.)
+add_subdirectory(common)
 add_subdirectory(crypto)
 add_subdirectory(util)
 add_subdirectory(transport)
@@ -71,7 +72,8 @@ add_executable(tests tests.cpp ${test_source})
 target_link_libraries(tests gtest_main 
   quictls 
   transport 
-  util 
+  util
+  quiccommon
   # OpenSSL::Crypto 
   ssl)
 gtest_discover_tests(tests)

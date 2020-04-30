@@ -11,6 +11,21 @@
 
 #include "transport/exception.h"
 
+enum class Endpoint : bool {
+    Client,
+    Server,
+};
+
+enum StreamDirection : bool {
+    Bidirectional,
+    Unidirectional,
+};
+
+enum ReadWriteMode : bool {
+    ReadMode,
+    WriteMode,
+};
+
 class StreamId {
 
 public: 

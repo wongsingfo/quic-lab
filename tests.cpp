@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "util/utility.h"
-#include "config.h"
+#include "common/config.h"
 
 INITIALIZE_EASYLOGGINGPP
 

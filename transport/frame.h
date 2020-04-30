@@ -12,7 +12,7 @@
 
 constexpr int kNumOfFrameTypes = 21;
 
-using FrameType = uint64_t;
+using FrameType = uint8_t;
 
 constexpr FrameType FRAME_TYPE_PADDING = 0x0;
 constexpr FrameType FRAME_TYPE_PING = 0x1;
@@ -30,6 +30,9 @@ constexpr FrameType FRAME_TYPE_NEW_TOKEN = 0x7;
 // from 0x08 to 0x0f). The value of the three low-order bits of the 
 // frame type determines the fields that are present in the frame.
 constexpr FrameType FRAME_TYPE_STREAM = 0x8;
+constexpr FrameType STREAM_FRAME_BIT_FIN = 0x01;
+constexpr FrameType STREAM_FRAME_BIT_LEN = 0x02;
+constexpr FrameType STREAM_FRAME_BIT_OFF = 0x04;
 
 constexpr FrameType FRAME_TYPE_STREAM_MAX = 0xf;
 constexpr FrameType FRAME_TYPE_MAX_DATA = 0x10;
@@ -47,10 +50,6 @@ constexpr FrameType FRAME_TYPE_PATH_RESPONSE = 0x1b;
 constexpr FrameType FRAME_TYPE_CONNECTION_CLOSE_TRANSPORT = 0x1c;
 constexpr FrameType FRAME_TYPE_CONNECTION_CLOSE_APPLICATION = 0x1d;
 constexpr FrameType FRAME_TYPE_HANDSHAKE_DONE = 0x1e;
-
-constexpr FrameType STREAM_FRAME_BIT_FIN = 0x01;
-constexpr FrameType STREAM_FRAME_BIT_LEN = 0x02;
-constexpr FrameType STREAM_FRAME_BIT_OFF = 0x04;
 
 using std::experimental::optional;
 
@@ -153,5 +152,7 @@ struct Frame {
     static Frames from_reader(StringReader &reader);
 };
 
+static_assert(sizeof(StreamFrame) <= 64, 
+    "struct Frame should not be larger than L1 cache line size");
 
 #endif //TRANSPORT_FRAME_H

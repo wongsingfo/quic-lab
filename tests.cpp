@@ -1,7 +1,10 @@
 #include "gtest/gtest.h"
 #include "util/utility.h"
+#include "config.h"
 
 INITIALIZE_EASYLOGGINGPP
+
+QuicConfig default_quic_config;
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

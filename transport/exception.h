@@ -18,7 +18,7 @@ public:
 };
 
 // https://quicwg.org/base-drafts/draft-ietf-quic-transport.html#name-quic-transport-error-codes-
-enum class QuicError {
+enum class QuicError : uint8_t {
     INTERNAL_ERROR = 0x1,
     FRAME_ENCODING_ERROR = 0x7,
 };

@@ -40,8 +40,30 @@ Frames Frame::from_reader(StringReader &reader) {
             case FRAME_TYPE_NEW_TOKEN:
                 frame.new_token = NewTokenFrame::from_reader(reader);
                 break;
-            case FRAME_TYPE_STREAM ... FRAME_TYPE_STREAM + 7:
+            case FRAME_TYPE_STREAM ... FRAME_TYPE_STREAM_MAX:
+                frame.type = FRAME_TYPE_STREAM;
                 frame.stream = StreamFrame::from_reader(reader, type_id);
+                break;
+
+            case FRAME_TYPE_MAX_DATA:
+            case FRAME_TYPE_MAX_STREAM_DATA:
+
+            case FRAME_TYPE_DATA_BLOCKED:
+            case FRAME_TYPE_STREAM_DATA_BLOCKED:
+                frame.type = FRAME_TYPE_MAX_DATA;
+                frame.max_data = MaxDataFrame::from_reader(reader, type_id);
+
+            case FRAME_TYPE_MAX_STREAMS_BIDI:
+            case FRAME_TYPE_MAX_STREAMS_UNIDI:
+
+            case FRAME_TYPE_STREAMS_BLOCKED_BIDI:
+            case FRAME_TYPE_STREAMS_BLOCKED_UNIDI:
+                frame.type = FRAME_TYPE_MAX_STREAMS_BIDI;
+                frame.max_stream = MaxStreamFrame::from_reader(reader, type_id);
+                break;
+
+            case FRAME_TYPE_HANDSHAKE_DONE:
+                frame.handshake_done = HandshakeDoneFrame::from_reader(reader);
                 break;
             default:
                 throw quic_error(QuicError::FRAME_ENCODING_ERROR);
@@ -59,6 +81,8 @@ void Frame::delete_frame() {
             delete ack;
         case FRAME_TYPE_NEW_TOKEN:
             delete new_token;
+        case FRAME_TYPE_STREAM:
+            delete stream;
         default:
             return;
     }
@@ -158,7 +182,7 @@ NewTokenFrame *NewTokenFrame::from_reader(StringReader &reader) {
     };
 }
 
-StreamFrame StreamFrame::from_reader(StringReader &reader, FrameType type_id) {
+StreamFrame *StreamFrame::from_reader(StringReader &reader, FrameType type_id) {
     StreamId stream_id = reader.read_with_variant_length();
     uint64_t offset = 0;
     if (type_id & STREAM_FRAME_BIT_OFF) {
@@ -173,11 +197,42 @@ StreamFrame StreamFrame::from_reader(StringReader &reader, FrameType type_id) {
     }
     StringRef data = {reader.peek_data(), length};
     reader.skip(length);
-    return StreamFrame {
+    return new StreamFrame {
         .stream_id = stream_id,
         .offset = offset,
         .data = data,
         .fin = static_cast<bool>(type_id & STREAM_FRAME_BIT_FIN),
     };
 }
+
+MaxDataFrame MaxDataFrame::from_reader(StringReader &reader, FrameType type_id) {
+    bool is_connection_level = (type_id & 0x1) == 0;
+    bool is_block = (type_id & 0x4) == 1;
+    StreamId stream_id;
+    if (!is_connection_level) {
+        stream_id = reader.read_with_variant_length();
+    }
+
+    uint64_t max_data = reader.read_with_variant_length();
+    return MaxDataFrame {
+        .is_connection_level = is_connection_level,
+        .is_block = is_block,
+        .stream_id = stream_id,
+        .max_data = max_data,
+    };
+}
+
+MaxStreamFrame MaxStreamFrame::from_reader(StringReader &reader, FrameType type_id) {
+    bool is_bidirectional = (type_id & 0x1) == 0;
+    bool is_block = (type_id & 0x4) == 1;
+    uint64_t max_stream = reader.read_with_variant_length();
+
+    return MaxStreamFrame {
+        .is_bidirectional = is_bidirectional,
+        .is_block = is_block,
+        .max_stream = max_stream,
+    };
+}
+
+
 

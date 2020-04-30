@@ -17,7 +17,7 @@ using FrameType = uint8_t;
 constexpr FrameType FRAME_TYPE_PADDING = 0x0;
 constexpr FrameType FRAME_TYPE_PING = 0x1;
 
-// we store these two types into the same structure
+// we store the data of the following two types into the same structure
 constexpr FrameType FRAME_TYPE_ACK = 0x2;
 constexpr FrameType FRAME_TYPE_ACK_ECN = 0x3;
 
@@ -30,19 +30,23 @@ constexpr FrameType FRAME_TYPE_NEW_TOKEN = 0x7;
 // from 0x08 to 0x0f). The value of the three low-order bits of the 
 // frame type determines the fields that are present in the frame.
 constexpr FrameType FRAME_TYPE_STREAM = 0x8;
+constexpr FrameType FRAME_TYPE_STREAM_MAX = 0xf;
 constexpr FrameType STREAM_FRAME_BIT_FIN = 0x01;
 constexpr FrameType STREAM_FRAME_BIT_LEN = 0x02;
 constexpr FrameType STREAM_FRAME_BIT_OFF = 0x04;
 
-constexpr FrameType FRAME_TYPE_STREAM_MAX = 0xf;
+// we store the data of the following four types into the same structure
 constexpr FrameType FRAME_TYPE_MAX_DATA = 0x10;
 constexpr FrameType FRAME_TYPE_MAX_STREAM_DATA = 0x11;
-constexpr FrameType FRAME_TYPE_MAX_STREAMS_BIDI = 0x12;
-constexpr FrameType FRAME_TYPE_MAX_STREAMS_UNIDI = 0x13;
 constexpr FrameType FRAME_TYPE_DATA_BLOCKED = 0x14;
 constexpr FrameType FRAME_TYPE_STREAM_DATA_BLOCKED = 0x15;
+
+// we store the data of the following four types into the same structure
+constexpr FrameType FRAME_TYPE_MAX_STREAMS_BIDI = 0x12;
+constexpr FrameType FRAME_TYPE_MAX_STREAMS_UNIDI = 0x13;
 constexpr FrameType FRAME_TYPE_STREAMS_BLOCKED_BIDI = 0x16;
 constexpr FrameType FRAME_TYPE_STREAMS_BLOCKED_UNIDI = 0x17;
+
 constexpr FrameType FRAME_TYPE_NEW_CONNECTION_ID = 0x18;
 constexpr FrameType FRAME_TYPE_RETIRE_CONNECTION_ID = 0x19;
 constexpr FrameType FRAME_TYPE_PATH_CHALLENGE = 0x1a;
@@ -124,7 +128,35 @@ struct StreamFrame {
     StringRef data;
     bool fin;
 
-    static StreamFrame from_reader(StringReader &reader, FrameType type_id);
+    static StreamFrame *from_reader(StringReader &reader, 
+            FrameType type_id);
+};
+
+struct MaxDataFrame {
+    bool is_connection_level;
+    bool is_block;
+    StreamId stream_id;
+
+    // maximum amount of data that can be sent on a stream.
+    uint64_t max_data;
+
+    static MaxDataFrame from_reader(StringReader &reader, 
+            FrameType type_id);
+};
+
+struct MaxStreamFrame {
+    bool is_bidirectional;
+    bool is_block;
+    uint64_t max_stream;
+
+    static MaxStreamFrame from_reader(StringReader &reader, 
+            FrameType type_id);
+};
+
+struct HandshakeDoneFrame {
+    /* empty */
+
+    static HandshakeDoneFrame from_reader(StringReader &reader) { return {}; }
 };
 
 // Version Negotiation, Stateless Reset, and Retry packets do not
@@ -144,7 +176,10 @@ struct Frame {
         StopSendingFrame stop_sending;
         CryptoFrame crypto;
         NewTokenFrame *new_token;
-        StreamFrame stream;
+        StreamFrame *stream;
+        MaxDataFrame max_data;
+        MaxStreamFrame max_stream;
+        HandshakeDoneFrame handshake_done;
     };
 
     void delete_frame();
@@ -152,7 +187,7 @@ struct Frame {
     static Frames from_reader(StringReader &reader);
 };
 
-static_assert(sizeof(StreamFrame) <= 64, 
-    "struct Frame should not be larger than L1 cache line size");
+static_assert(sizeof(Frame) <= 32, 
+    "struct Frame should not be larger than 32 bytes");
 
 #endif //TRANSPORT_FRAME_H

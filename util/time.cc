@@ -7,7 +7,7 @@
 #include <sstream>
 #include "util/time.h"
 
-std::string Duration::toDebugValue() const {
+std::string Duration::to_debug_value() const {
   const int64_t one_ms = 1000;
   const int64_t one_s = 1000 * one_ms;
 

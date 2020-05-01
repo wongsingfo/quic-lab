@@ -57,6 +57,7 @@ add_subdirectory(common)
 add_subdirectory(crypto)
 add_subdirectory(util)
 add_subdirectory(transport)
+add_subdirectory(recovery)
 
 set(test_source
         crypto/crypto_test.cc
@@ -72,6 +73,7 @@ add_executable(tests tests.cpp ${test_source})
 target_link_libraries(tests gtest_main 
   quictls 
   transport 
+  recovery
   util
   quiccommon
   # OpenSSL::Crypto 

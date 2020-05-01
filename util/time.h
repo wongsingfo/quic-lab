@@ -25,41 +25,45 @@ public:
     static constexpr Duration infinite() { return Duration(kInfiniteTimeUs); }
 
     // Converts a number of seconds to a time offset.
-    static constexpr Duration fromSeconds(int64_t secs) {
+    static constexpr Duration from_seconds(int64_t secs) {
         return Duration(secs * 1000 * 1000);
     }
 
     // Converts a number of milliseconds to a time offset.
-    static constexpr Duration fromMilliseconds(int64_t ms) {
+    static constexpr Duration from_milliseconds(int64_t ms) {
         return Duration(ms * 1000);
     }
 
     // Converts a number of microseconds to a time offset.
-    static constexpr Duration fromMicroseconds(int64_t us) { return Duration(us); }
+    static constexpr Duration from_microseconds(int64_t us) { return Duration(us); }
 
     // Converts the time offset to a rounded number of seconds.
     inline int64_t toSeconds() const { return time_offset_ / 1000 / 1000; }
 
     // Converts the time offset to a rounded number of milliseconds.
-    inline int64_t toMilliseconds() const { return time_offset_ / 1000; }
+    inline int64_t to_milliseconds() const { return time_offset_ / 1000; }
 
     // Converts the time offset to a rounded number of microseconds.
-    inline int64_t toMicroseconds() const { return time_offset_; }
+    inline int64_t to_microseconds() const { return time_offset_; }
 
-    inline struct timeval toTimeval() const {
+    inline struct timeval to_timeval() const {
         return timeval {
           .tv_sec = static_cast<time_t>(time_offset_ / 1000000),
           .tv_usec = static_cast<suseconds_t>(time_offset_ % 1000000) 
         };
     }
 
-    inline bool isZero() const { return time_offset_ == 0; }
+    inline bool is_zero() const { return time_offset_ == 0; }
 
-    inline bool isInfinite() const {
+    inline bool is_infinite() const {
         return time_offset_ == kInfiniteTimeUs;
     }
 
-    std::string toDebugValue() const;
+    inline Duration abs() const {
+      return Duration(time_offset_ >= 0 ? time_offset_ : -time_offset_);
+    }
+
+    std::string to_debug_value() const;
 
     static const int64_t kInfiniteTimeUs =
         std::numeric_limits<int64_t>::max();
@@ -223,7 +227,7 @@ inline Duration operator-(Instant lhs, Instant rhs) {
 // Override stream output operator for gtest.
 inline std::ostream& operator<<(std::ostream& output,
                                 const Duration delta) {
-  output << delta.toDebugValue();
+  output << delta.to_debug_value();
   return output;
 }
 

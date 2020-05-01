@@ -79,7 +79,9 @@ struct AckRange {
 struct AckFrame {
     bool is_ECN;
 
-    uint64_t largest_ack;
+    PacketNumber largest_ack;
+
+    // in microseconds
     uint64_t ack_delay;
 
     // vector of (start, length) pairs

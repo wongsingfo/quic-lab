@@ -9,6 +9,8 @@
 // https://github.com/amrayn/easyloggingpp
 #include "util/easylogging++.h"
 
+using std::unique_ptr;
+
 namespace std {
 
 template<typename T, typename... Args>

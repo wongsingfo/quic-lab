@@ -7,6 +7,11 @@
 
 #include <cstdint>
 
+#include "util/time.h"
+
+// Timer granularity. This is a system-dependent value
+constexpr Duration kTimerGranularity = Duration::from_milliseconds(1);
+
 struct QuicConfig {
     // sending buffer size
     size_t tx_buffer_size = 64 * 1024; // 64 KB

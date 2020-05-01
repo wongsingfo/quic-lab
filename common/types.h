@@ -74,17 +74,35 @@ public:
 class PacketNumber {
 
 public:
+    using dtype = uint64_t;
+
+    PacketNumber(dtype value)
+    : value(value) {}
 
     PacketNumber() = default;
-
-    using dtype = uint64_t;
 
     dtype value;
 
     static PacketNumber::dtype from_string(StringRef s, size_t length);
 
+    inline bool operator< (const PacketNumber &o) const {
+        return value < o.value;
+    }
+
+    inline bool operator> (const PacketNumber &o) const {
+        return value > o.value;
+    }
+
 };
 
 using Version = uint32_t;
+
+// packet number spaces
+constexpr size_t kNumOfPNSpaces = 3;
+enum class PNSpace {
+    Intial = 0,
+    Handshake = 1,
+    Application = 2,
+};
 
 #endif //TRANSPORT_TYPES_H

@@ -14,7 +14,8 @@ class RttTime {
 public: 
 
     RttTime(Duration max_ack_delay) 
-        : max_ack_delay_(max_ack_delay),
+        : latest_rtt_(Duration::zero()),
+          max_ack_delay_(max_ack_delay),
           min_rtt_(Duration::infinite()),
           smoothed_rtt_(Duration::zero()),
           rttvar_(Duration::zero()),
@@ -24,7 +25,9 @@ public:
     // |ack_delay| is carried in the ACK frame
     void update_rtt(Duration rtt_sample, Duration ack_delay);
 
-private:
+    // Time Threshold for loss detection
+    // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-time-threshold
+    Duration loss_delay();
 
     RttTime (RttTime&&) = default;
     RttTime& operator= (RttTime&&) = default;
@@ -32,6 +35,10 @@ private:
     // disallow copy and assignment
     RttTime (const RttTime&) = delete;
     RttTime& operator= (const RttTime&) = delete;
+
+private:
+
+    Duration latest_rtt_;
 
     // transport parameter
     Duration max_ack_delay_;

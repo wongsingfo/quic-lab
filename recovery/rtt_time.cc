@@ -43,3 +43,9 @@ Duration RttTime::loss_delay() {
     Duration result = (std::max(latest_rtt_, smoothed_rtt_) * 9) >> 3;
     return std::max(kTimerGranularity, result);
 }
+
+Duration RttTime::pto() {
+    return smoothed_rtt_ 
+        + std::max(4 * rttvar_, kTimerGranularity) 
+        + max_ack_delay_;
+}

@@ -6,12 +6,13 @@
 #define SENT_PACKET_H
 
 #include "util/time.h"
+#include "recovery/recovery_token.h"
 
 // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-sent-packet-fields
 // record the information about a packet that was sent
 struct SentPacket {
 
-    Frames frames;
+    RecoverTokens frames;
 
     Instant time_sent;
 

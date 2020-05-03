@@ -100,7 +100,7 @@ using Version = uint32_t;
 // packet number spaces
 constexpr size_t kNumOfPNSpaces = 3;
 enum class PNSpace {
-    Intial = 0,
+    Initial = 0,
     Handshake = 1,
     Application = 2,
 };

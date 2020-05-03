@@ -29,6 +29,8 @@ public:
     // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-time-threshold
     Duration loss_delay();
 
+    Duration pto();
+
     RttTime (RttTime&&) = default;
     RttTime& operator= (RttTime&&) = default;
 

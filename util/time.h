@@ -120,9 +120,13 @@ class Instant {
   // represents the number of microseconds since some epoch.  It may
   // be the UNIX epoch on some platforms.  On others, it may
   // be a CPU ticks based value.
-  inline int64_t toDebuggingValue() const { return time_; }
+  inline int64_t to_debugging_value() const { return time_; }
 
-  inline bool isInitialized() const { return 0 != time_; }
+  inline bool is_initialized() const { return 0 != time_; }
+
+  inline bool is_infinite() const {
+     return time_ == Duration::kInfiniteTimeUs;
+  }
 
  private:
 
@@ -188,7 +192,7 @@ inline bool operator>=(Instant lhs, Instant rhs) {
 
 // Override stream output operator for gtest or CHECK macros.
 inline std::ostream& operator<<(std::ostream& output, const Instant t) {
-  output << t.toDebuggingValue();
+  output << t.to_debugging_value();
   return output;
 }
 

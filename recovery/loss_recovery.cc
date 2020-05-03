@@ -50,7 +50,7 @@ LossRecoverySpace::detect_and_remove_acked_packets(AckFrame &ack) {
 }
 
 std::vector<unique_ptr<SentPacket>>
-LossRecoverySpace::detect_and_remove_lost_packets(AckFrame &ack, Duration loss_delay,
+LossRecoverySpace::detect_and_remove_lost_packets(Duration loss_delay,
                                                   Instant now) {
     // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-detecting-lost-packets
     std::vector<unique_ptr<SentPacket>> lost_packets;
@@ -91,9 +91,16 @@ LossRecoverySpace::detect_and_remove_lost_packets(AckFrame &ack, Duration loss_d
 
 void LossRecovery::on_packet_sent(PNSpace space, PacketNumber pn,
                                   unique_ptr<SentPacket> packet) {
+    if (! packet->in_flight) {
+        return;
+    }
+
+    Instant now = packet->time_sent;
+
     // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-on-sending-a-packet
     cc_->on_packet_sent(packet);
     spaces_[space].on_packet_sent(pn, std::move(packet));
+    set_loss_detection_alarm(now);
 }
 
 void LossRecovery::on_ack_received(PNSpace space, AckFrame &ack, Instant now) {
@@ -127,7 +134,7 @@ void LossRecovery::on_ack_received(PNSpace space, AckFrame &ack, Instant now) {
 
     auto lost_packets =
         recovery_space.detect_and_remove_lost_packets(
-            ack, rtt_time_.loss_delay(), now);
+            rtt_time_.loss_delay(), now);
 
     if (!lost_packets.empty()) {
         cc_->on_packet_lost(lost_packets);
@@ -140,7 +147,7 @@ void LossRecovery::on_ack_received(PNSpace space, AckFrame &ack, Instant now) {
         pto_count_ = 0;
     }
 
-    // SetLossDetectionTimer()
+    set_loss_detection_alarm(now);
 }
 
 bool LossRecovery::includes_ack_eliciting(
@@ -165,3 +172,94 @@ bool LossRecovery::peer_completed_address_validation() {
     //       has received HANDSHAKE_DONE
     return true;
 }
+
+void LossRecovery::set_loss_detection_alarm(Instant now) {
+    // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-setting-the-loss-detection-
+    // GetEarliestTimeAndSpace
+    Instant earliest_loss_time = std::get<0>(
+        get_earliest_time_and_space(&LossRecoverySpace::loss_time));
+
+    // Time threshold loss Detection
+    if (!earliest_loss_time.is_infinite()) {
+        loss_detection_alarm_->update(earliest_loss_time);
+        return;
+    }
+
+    // TODO:
+    // if (server is at anti-amplification limit):
+    //  The server's alarm is not set if nothing can be sent.
+    //  loss_detection_timer.cancel()
+    //  return
+
+    // TODO:
+    // if (no ack-eliciting packets in flight &&
+    //     PeerCompletedAddressValidation()):
+    //   // There is nothing to detect lost, so no timer is set.
+    //   // However, the client needs to arm the timer if the
+    //   // server might be blocked by the anti-amplification limit.
+    //   loss_detection_timer.cancel()
+    //   return
+
+    // Determine which PN space to arm PTO for.
+    PNSpace pn_space;
+    Instant sent_time = Instant::infinite();
+    std::tie(sent_time, pn_space) = get_earliest_time_and_space(
+        &LossRecoverySpace::time_of_last_sent_ack_eliciting_packet);
+
+    // Don't arm PTO for ApplicationData until handshake complete.
+    if (pn_space == PNSpace::Application && !is_handshake_complete_) {
+        loss_detection_alarm_->cancel();
+    }
+
+    if (sent_time.is_infinite()) {
+        dynamic_check(!peer_completed_address_validation());
+        sent_time = now;
+    }
+
+    // Calculate PTO duration
+    Duration timeout = rtt_time_.pto();
+    timeout = timeout << std::min(pto_count_, size_t(kPtoCountLimit));
+    loss_detection_alarm_->update(sent_time + timeout);
+}
+
+void LossRecovery::on_loss_detection_timeout(Instant now) {
+    // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-on-timeout
+    std::tuple<Instant, PNSpace> earliest_loss = 
+        get_earliest_time_and_space(&LossRecoverySpace::loss_time);
+
+    // Time threshold loss Detection
+    if (!std::get<0>(earliest_loss).is_infinite()) {
+        auto lost_packets = 
+            spaces_[std::get<1>(earliest_loss)].detect_and_remove_lost_packets(
+                rtt_time_.loss_delay(), now);
+
+        dynamic_check(! lost_packets.empty());
+        cc_->on_packet_lost(lost_packets);
+
+        set_loss_detection_alarm(now);
+        return;
+    }
+
+
+}
+
+std::tuple<Instant, PNSpace> 
+LossRecovery::get_earliest_time_and_space(WhatEarliestTime what) {
+    PNSpace space = PNSpace::Initial;
+    Instant time = (spaces_[0].*what)();
+
+    for (int i = 1; i < kNumOfPNSpaces; i++) {
+        PNSpace pn_space = static_cast<PNSpace>(i);
+        Instant pn_space_time = (spaces_[i].*what)();
+        if (pn_space_time < time && 
+            // Skip ApplicationData until handshake completion.
+            (pn_space != PNSpace::Application || is_handshake_complete_)) {
+
+            time = pn_space_time;
+            space = pn_space;
+        }
+    }
+
+    return std::make_tuple(time, space);
+}
+

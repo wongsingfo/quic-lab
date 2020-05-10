@@ -58,6 +58,7 @@ add_subdirectory(crypto)
 add_subdirectory(util)
 add_subdirectory(transport)
 add_subdirectory(recovery)
+add_subdirectory(posix)
 
 set(test_source
         crypto/crypto_test.cc
@@ -76,6 +77,7 @@ target_link_libraries(tests gtest_main
   recovery
   util
   quiccommon
+  posix
   # OpenSSL::Crypto 
   ssl)
 gtest_discover_tests(tests)

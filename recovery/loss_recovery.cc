@@ -55,7 +55,7 @@ LossRecoverySpace::detect_and_remove_lost_packets(Duration loss_delay,
     // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-detecting-lost-packets
     std::vector<unique_ptr<SentPacket>> lost_packets;
 
-    dynamic_check(largest_acked_packet_.has_value());
+    DCHECK(largest_acked_packet_.has_value());
     PacketNumber largest_acked_packet = largest_acked_packet_.value();
 
     Instant lost_send_time = now - loss_delay;
@@ -212,7 +212,7 @@ void LossRecovery::set_loss_detection_alarm(Instant now) {
     }
 
     if (sent_time.is_infinite()) {
-        dynamic_check(!peer_completed_address_validation());
+        DCHECK(!peer_completed_address_validation());
         sent_time = now;
     }
 
@@ -233,14 +233,33 @@ void LossRecovery::on_loss_detection_timeout(Instant now) {
             spaces_[std::get<1>(earliest_loss)].detect_and_remove_lost_packets(
                 rtt_time_.loss_delay(), now);
 
-        dynamic_check(! lost_packets.empty());
+        DCHECK(!lost_packets.empty());
         cc_->on_packet_lost(lost_packets);
 
         set_loss_detection_alarm(now);
         return;
     }
 
+    // TODO:
+    //   IMPORTANT:
+    // if (bytes_in_flight > 0):
+    //     // PTO. Send new data if available, else retransmit old data.
+    //     // If neither is available, send a single PING frame.
+    //     _, pn_space = GetEarliestTimeAndSpace(
+    //       time_of_last_sent_ack_eliciting_packet)
+    //     SendOneOrTwoAckElicitingPackets(pn_space)
+    //   else:
+    //     assert(endpoint is client without 1-RTT keys)
+    //     // Client sends an anti-deadlock packet: Initial is padded
+    //     // to earn more anti-amplification credit,
+    //     // a Handshake packet proves address ownership.
+    //     if (has Handshake keys):
+    //       SendOneAckElicitingHandshakePacket()
+    //     else:
+    //       SendOneAckElicitingPaddedInitialPacket()
 
+    pto_count_ += 1;
+    set_loss_detection_alarm(now);
 }
 
 std::tuple<Instant, PNSpace> 

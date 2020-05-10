@@ -31,7 +31,7 @@ public:
     static StringRef from_text(const char* text);
 
     inline StringRef sub_string(size_t begin, size_t end) const {
-        dynamic_check(begin <= end && end <= size());
+        DCHECK(begin <= end && end <= size());
         return StringRef(data() + begin, end - begin);
     }
 
@@ -40,7 +40,7 @@ public:
     }
 
     inline dtype& operator [] (size_t i) const {
-        dynamic_check(i <= size());
+        DCHECK(i <= size());
         return data_[i];
     }
 

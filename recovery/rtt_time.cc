@@ -34,7 +34,7 @@ void RttTime::update_rtt(Duration rtt_sample, Duration ack_delay) {
 }
 
 Duration RttTime::loss_delay() {
-    dynamic_check(! no_samples_);
+    DCHECK(!no_samples_);
 
     // kTimeThreshold = 9 / 8
     // Maximum reordering in time before time threshold loss detection considers

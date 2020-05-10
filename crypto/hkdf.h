@@ -6,7 +6,7 @@
 #include "util/utility.h"
 #include "util/exception.h"
 #include "util/string.h"
-#include "crypto/exception.h"
+#include "util/exception_ssl.h"
 
 enum class HkdfHash {
     // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf

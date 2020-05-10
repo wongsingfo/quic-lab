@@ -6,7 +6,7 @@
 #define CRYPTO_HP_H
 
 #include "util/string.h"
-#include "crypto/exception.h"
+#include "util/exception_ssl.h"
 
 enum class HpAlgorithm {
 // https://quicwg.org/base-drafts/draft-ietf-quic-tls.html#name-aes-based-header-protection

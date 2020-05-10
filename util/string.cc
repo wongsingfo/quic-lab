@@ -39,7 +39,7 @@ String String::from_hex(const char* text) {
         } else {
             int byte = std::stoi(std::string(1, c1) + c2, 0, 16);
 
-            dynamic_check(0 <= byte && byte <= 255);
+            DCHECK(0 <= byte && byte <= 255);
 
             result += (char) (byte);
         }

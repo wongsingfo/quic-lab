@@ -11,7 +11,7 @@
 
 #include "openssl/base.h"
 
-#include "crypto/exception.h"
+#include "util/exception_ssl.h"
 #include "util/string.h"
 #include "crypto/aead.h"
 #include "crypto/cipher.h"

@@ -7,7 +7,7 @@
 #include "openssl/evp.h"
 #include "openssl/aead.h"
 
-#include "exception.h"
+#include "util/exception_ssl.h"
 
 namespace crypto {
 
@@ -45,7 +45,7 @@ void aead_inplace(const EVP_AEAD *aead, StringRef key,
                                        text.data(),
                                        text.size() - tag_len,
                                        ad.data(), ad.size()));
-        dynamic_check(out_len == text.size());
+        DCHECK(out_len == text.size());
     } else {
         openssl_call("EVP_AEAD_CTX_open",
                      EVP_AEAD_CTX_open(ctx,
@@ -54,7 +54,7 @@ void aead_inplace(const EVP_AEAD *aead, StringRef key,
                                        nonce.data(), nonce.size(),
                                        text.data(), text.size(),
                                        ad.data(), ad.size()));
-        dynamic_check(out_len + tag_len == text.size());
+        DCHECK(out_len + tag_len == text.size());
     }
 
     EVP_AEAD_CTX_free(ctx);

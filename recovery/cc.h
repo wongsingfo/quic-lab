@@ -5,6 +5,8 @@
 #ifndef CONGESTION_CONTROL_H
 #define CONGESTION_CONTROL_H
 
+#include <ostream>
+
 #include "recovery/sent_packet.h"
 
 // CC interface
@@ -16,18 +18,18 @@ public:
 
     virtual void on_packet_sent(unique_ptr<SentPacket> &packet) = 0;
 
-    virtual void on_packet_lost(std::vector<unique_ptr<SentPacket>> &packets) = 0;
+    virtual void on_packet_lost(Instant now, std::vector<unique_ptr<SentPacket>> &packets) = 0;
 
     virtual void on_packet_acked(std::vector<unique_ptr<SentPacket>> &packets) = 0;
 
-private:
+    virtual void print(std::ostream& os) {
+    	os << "unknown cc";
+    }
 
-    CongestionControl (CongestionControl&&) = default;
-    CongestionControl& operator= (CongestionControl&&) = default;
-
-    // disallow copy and assignment
-    CongestionControl (const CongestionControl&) = delete;
-    CongestionControl& operator= (const CongestionControl&) = delete;
+    friend std::ostream& operator<< (std::ostream& out, CongestionControl& self) {
+	    self.print(out);
+	    return out;
+	}
 
 };
 

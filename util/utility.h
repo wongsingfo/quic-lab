@@ -34,5 +34,14 @@ inline std::unique_ptr<T> make_unique(Args &&... args) {
 
 #endif
 
+template<typename T> constexpr
+static T const& const_max(T const& a, T const& b) {
+    return a > b ? a : b;
+}
+
+template<typename T> constexpr
+static T const& const_min(T const& a, T const& b) {
+    return a < b ? a : b;
+}
 
 #endif

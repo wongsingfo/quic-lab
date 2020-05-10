@@ -10,7 +10,7 @@
 #include "common/frame.h"
 #include "common/types.h"
 #include "recovery/sent_packet.h"
-#include "recovery/congestion_control.h"
+#include "recovery/cc.h"
 #include "recovery/rtt_time.h"
 #include "util/alarm.h"
 

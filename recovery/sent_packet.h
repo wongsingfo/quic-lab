@@ -16,7 +16,7 @@ struct SentPacket {
 
     Instant time_sent;
 
-    Instant time_declared_lost;
+    // Instant time_declared_lost;
 
     // The number of bytes sent in the packet, not including UDP or 
     // IP overhead, but including QUIC framing overhead.

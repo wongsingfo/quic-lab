@@ -137,7 +137,7 @@ void LossRecovery::on_ack_received(PNSpace space, AckFrame &ack, Instant now) {
             rtt_time_.loss_delay(), now);
 
     if (!lost_packets.empty()) {
-        cc_->on_packet_lost(lost_packets);
+        cc_->on_packet_lost(now, lost_packets);
     }
     cc_->on_packet_acked(newly_acked_packets);
 
@@ -234,7 +234,7 @@ void LossRecovery::on_loss_detection_timeout(Instant now) {
                 rtt_time_.loss_delay(), now);
 
         DCHECK(!lost_packets.empty());
-        cc_->on_packet_lost(lost_packets);
+        cc_->on_packet_lost(Instant(0), lost_packets);
 
         set_loss_detection_alarm(now);
         return;

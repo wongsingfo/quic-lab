@@ -9,3 +9,5 @@ out/
 ## sftp
 /sftp-config.json
 
+## Macos
+.DS_Store

@@ -5,7 +5,7 @@
 #ifndef UTIL_STRING_WRITER_H
 #define UTIL_STRING_WRITER_H
 
-#include "util/string.h"
+#include "string_raw.h"
 
 class StringWriter : public StringRef {
 

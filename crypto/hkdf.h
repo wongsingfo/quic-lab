@@ -5,7 +5,7 @@
 
 #include "util/utility.h"
 #include "util/exception.h"
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "util/exception_ssl.h"
 
 enum class HkdfHash {

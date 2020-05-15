@@ -8,7 +8,7 @@
 
 #include <functional>
 
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "posix/sock_addr.h"
 #include "posix/file_descriptor.h"
 

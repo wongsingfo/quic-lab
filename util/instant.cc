@@ -5,7 +5,7 @@
 //
 
 #include <sstream>
-#include "util/time.h"
+#include "instant.h"
 
 std::string Duration::to_debug_value() const {
   const int64_t one_ms = 1000;

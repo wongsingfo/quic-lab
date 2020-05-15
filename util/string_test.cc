@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
-#include "util/string.h"
-#include "util/string_reader.h"
+#include "string_raw.h"
+#include "string_reader.h"
 
 class StringTest : public ::testing::Test {
 protected:

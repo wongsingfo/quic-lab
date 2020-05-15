@@ -6,7 +6,7 @@
 #define QUIC_LAB_EXCEPTION_SSL_H
 
 #include <openssl/err.h>
-#include "util/exception.h"
+#include "exception.h"
 
 /* error category for OpenSSL */
 class openssl_error_category : public std::error_category {

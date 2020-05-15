@@ -12,7 +12,7 @@
 #include "openssl/base.h"
 
 #include "util/exception_ssl.h"
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "crypto/aead.h"
 #include "crypto/cipher.h"
 

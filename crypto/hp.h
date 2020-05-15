@@ -5,7 +5,7 @@
 #ifndef CRYPTO_HP_H
 #define CRYPTO_HP_H
 
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "util/exception_ssl.h"
 
 enum class HpAlgorithm {

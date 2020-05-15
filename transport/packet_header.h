@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "util/optional.h"
-#include "common/types.h"
+#include "common/quic_types.h"
 
 // TODO
 

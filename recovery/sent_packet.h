@@ -5,7 +5,7 @@
 #ifndef SENT_PACKET_H
 #define SENT_PACKET_H
 
-#include "util/time.h"
+#include "util/instant.h"
 #include "recovery/recovery_token.h"
 
 // https://quicwg.org/base-drafts/draft-ietf-quic-recovery.html#name-sent-packet-fields

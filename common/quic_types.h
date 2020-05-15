@@ -5,7 +5,7 @@
 #ifndef TRANSPORT_TYPES_H
 #define TRANSPORT_TYPES_H
 
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "util/utility.h"
 #include "util/string_reader.h"
 

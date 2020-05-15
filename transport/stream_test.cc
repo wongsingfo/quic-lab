@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "transport/recv_buffer.h"
 
 class RecvBufferTest : public ::testing::Test {

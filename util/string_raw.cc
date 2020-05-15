@@ -1,10 +1,10 @@
-#include "util/string.h"
+#include "string_raw.h"
 
 #include <sstream>
 #include <ios>
 #include <iomanip>
 
-#include "util/utility.h"
+#include "utility.h"
 
 String String::from_hex(const char* text) {
     std::string result;

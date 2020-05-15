@@ -5,7 +5,7 @@
 #include <cstring>
 #include <string>
 
-#include "util/utility.h"
+#include "utility.h"
 
 class String;
 

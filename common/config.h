@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "util/time.h"
+#include "util/instant.h"
 
 // Timer granularity. This is a system-dependent value
 constexpr Duration kTimerGranularity = Duration::from_milliseconds(1);

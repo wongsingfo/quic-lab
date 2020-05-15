@@ -5,7 +5,7 @@
 #ifndef CRYPTO_CIPHER_H
 #define CRYPTO_CIPHER_H
 
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "crypto/aead.h"
 #include "crypto/hp.h"
 #include "crypto/hkdf.h"

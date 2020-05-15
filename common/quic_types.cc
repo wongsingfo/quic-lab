@@ -2,7 +2,7 @@
 // Created by Chengke Wong on 2020/4/9.
 //
 
-#include "common/types.h"
+#include "common/quic_types.h"
 
 Cid Cid::from_reader(StringReader &reader)  {
     uint8_t length = reader.read_u8();

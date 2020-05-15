@@ -7,7 +7,7 @@
 
 #include "common/config.h"
 #include "recovery/cc.h"
-#include "util/time.h"
+#include "util/instant.h"
 
 class CcCubic : public CongestionControl {
 

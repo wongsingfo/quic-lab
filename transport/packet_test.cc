@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "transport/packet_header.h"
 
 class PacketTest : public ::testing::Test {

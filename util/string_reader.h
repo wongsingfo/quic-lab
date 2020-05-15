@@ -5,7 +5,7 @@
 #ifndef UTIL_STRING_READER_H
 #define UTIL_STRING_READER_H
 
-#include "util/string.h"
+#include "string_raw.h"
 
 class StringReader : public StringRef {
 

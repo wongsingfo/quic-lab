@@ -8,7 +8,7 @@
 #include <tuple>
 
 #include "common/frame.h"
-#include "common/types.h"
+#include "common/quic_types.h"
 #include "recovery/sent_packet.h"
 #include "recovery/cc.h"
 #include "recovery/rtt_time.h"

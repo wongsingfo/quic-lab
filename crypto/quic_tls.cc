@@ -5,7 +5,7 @@
 #include "openssl/ssl.h"
 
 #include "quic_tls.h"
-#include "util/string.h"
+#include "util/string_raw.h"
 #include "crypto/aead.h"
 
 using namespace crypto;

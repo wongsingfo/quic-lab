@@ -7,7 +7,7 @@
 
 #include <map>
 
-#include "util/string.h"
+#include "util/string_raw.h"
 
 class RecvBuffer {
 

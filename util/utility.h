@@ -7,7 +7,7 @@
 #include <cassert>
 
 // https://github.com/amrayn/easyloggingpp
-#include "util/easylogging++.h"
+#include "easylogging++.h"
 
 using std::unique_ptr;
 

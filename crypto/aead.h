@@ -5,7 +5,7 @@
 #ifndef CRYPTO_AEAD_H
 #define CRYPTO_AEAD_H
 
-#include "util/string.h"
+#include "util/string_raw.h"
 
 // conform to the IANA Consideration
 enum class AeadAlgorithm {

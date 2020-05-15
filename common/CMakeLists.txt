@@ -1,4 +1,4 @@
 add_library(quiccommon STATIC
         frame.cc
-        types.cc)
+        quic_types.cc)
 

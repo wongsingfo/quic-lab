@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include "util/time.h"
+#include "instant.h"
 
 class AlarmManager;
 

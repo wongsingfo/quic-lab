@@ -10,7 +10,7 @@
 #include <openssl/err.h>
 
 #include "posix/socket.h"
-#include "util/string.h"
+#include "util/string_raw.h"
 
 class SecureSocket;
 

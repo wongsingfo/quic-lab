@@ -1,7 +1,8 @@
 add_library(util STATIC
-        string.cc
+        string_raw.cc
         string_writer.cc
         string_reader.cc
         easylogging++.cc
-        time.cc)
+        instant.cc
+        stopwatch.cc)
 

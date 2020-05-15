@@ -5,7 +5,7 @@
 #ifndef RTT_TIME_H
 #define RTT_TIME_H
 
-#include "util/time.h"
+#include "util/instant.h"
 
 // Estimating the Round-Trip Time
 // This class is not for generating RTT samples

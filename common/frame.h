@@ -17,7 +17,7 @@ using FrameType = uint8_t;
 constexpr FrameType FRAME_TYPE_PADDING = 0x0;
 constexpr FrameType FRAME_TYPE_PING = 0x1;
 
-// we store the data of the following two types into the same structure
+// the following two types are stored in the same `struct Frame`
 constexpr FrameType FRAME_TYPE_ACK = 0x2;
 constexpr FrameType FRAME_TYPE_ACK_ECN = 0x3;
 
@@ -35,13 +35,13 @@ constexpr FrameType STREAM_FRAME_BIT_FIN = 0x01;
 constexpr FrameType STREAM_FRAME_BIT_LEN = 0x02;
 constexpr FrameType STREAM_FRAME_BIT_OFF = 0x04;
 
-// we store the data of the following four types into the same structure
+// the following four types are stored in the same `struct Frame`
 constexpr FrameType FRAME_TYPE_MAX_DATA = 0x10;
 constexpr FrameType FRAME_TYPE_MAX_STREAM_DATA = 0x11;
 constexpr FrameType FRAME_TYPE_DATA_BLOCKED = 0x14;
 constexpr FrameType FRAME_TYPE_STREAM_DATA_BLOCKED = 0x15;
 
-// we store the data of the following four types into the same structure
+// the following four types are stored in the same `struct Frame`
 constexpr FrameType FRAME_TYPE_MAX_STREAMS_BIDI = 0x12;
 constexpr FrameType FRAME_TYPE_MAX_STREAMS_UNIDI = 0x13;
 constexpr FrameType FRAME_TYPE_STREAMS_BLOCKED_BIDI = 0x16;

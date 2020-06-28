@@ -31,8 +31,8 @@ public:
     RecvBuffer (const RecvBuffer&) = delete;
     RecvBuffer& operator=(const RecvBuffer&) = delete;
 
-    RecvBuffer (RecvBuffer&&) = default;
-    RecvBuffer& operator=(RecvBuffer&&) = default;
+    RecvBuffer (RecvBuffer&&) = delete;
+    RecvBuffer& operator=(RecvBuffer&&) = delete;
 
 private:
 

@@ -80,7 +80,7 @@ TEST_F(RecvBufferTest, Test04) {
 }
 
 TEST_F(RecvBufferTest, Test05) {
-    for (size_t i = 0; i < 2; i++) {
+    for (size_t i = 0; i < 10; i++) {
         data_arrive(i, i + 2);
         read_data(1);
         EXPECT_EQ(buffer.retired(), i + 1);

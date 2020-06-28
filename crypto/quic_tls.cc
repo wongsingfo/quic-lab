@@ -111,7 +111,7 @@ void QuicTlsContext::load_verify_locations_from_path(const char *path) {
                  SSL_CTX_load_verify_locations(ctx_, nullptr, path));
 }
 
-QuicTls::QuicTls(QuicTlsContext ctx, bool is_server,
+QuicTls::QuicTls(QuicTlsContext &ctx, bool is_server,
         const SecretCallback &secret_callback, 
         const DataCallback &data_callback)
     : ssl_(SSL_new(ctx.ctx_)),

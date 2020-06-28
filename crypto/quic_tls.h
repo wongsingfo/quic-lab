@@ -42,6 +42,11 @@ public:
 
     void load_verify_locations_from_path(const char* path);
 
+
+    // disallow copy and assignment
+    QuicTlsContext (const QuicTlsContext&) = delete;
+    QuicTlsContext& operator=(const QuicTlsContext&) = delete;
+
 private:
     SSL_CTX *ctx_;
 
@@ -53,7 +58,7 @@ public:
     using SecretCallback = std::function<void(EncryptionLevel level, bool is_read, Cipher cipher)>;
     using DataCallback = std::function<void(EncryptionLevel level, StringRef data)>;
 
-    QuicTls(QuicTlsContext ctx, bool is_server, 
+    QuicTls(QuicTlsContext &ctx, bool is_server, 
         const SecretCallback &secret_callback, 
         const DataCallback &data_callback);
 
@@ -70,6 +75,11 @@ public:
     inline DataCallback get_data_callback() const {
         return data_callback_;
     }
+
+
+    // disallow copy and assignment
+    QuicTls (const QuicTls&) = delete;
+    QuicTls& operator=(const QuicTls&) = delete;
 
 private:
 

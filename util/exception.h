@@ -18,7 +18,7 @@ public:
                  const std::string &s_attempt,
                  const int error_code)
         : system_error(error_code, category),
-          attempt_and_error_(s_attempt + ": " + std::system_error::what())
+          attempt_and_error_(s_attempt + ": " + category.message(error_code))
     {}
 
     const char* what() const noexcept override {
@@ -26,11 +26,22 @@ public:
     }
 };
 
+class unix_error_category : public std::error_category {
+public:
+    const char *name() const noexcept override { 
+        return "Unix"; 
+    }
+
+    std::string message(const int error_code) const noexcept override {
+        return strerror(error_code);
+    }
+};
+
 class unix_error : public tagged_error {
 public:
     unix_error(const std::string &s_attempt,
                const int s_errno = errno)
-        : tagged_error(std::system_category(), s_attempt, s_errno)
+        : tagged_error(unix_error_category(), s_attempt, s_errno)
     {}
 };
 

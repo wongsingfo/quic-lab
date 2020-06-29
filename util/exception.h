@@ -6,7 +6,7 @@
 #include <system_error>
 #include <iostream>
 #include <typeinfo>
-
+#include <string.h>
 #include <cxxabi.h>
 
 class tagged_error : public std::system_error {
